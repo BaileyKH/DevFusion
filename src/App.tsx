@@ -8,6 +8,11 @@ import { Home } from "./pages/Home"
 import { Auth } from "./pages/Auth"
 import { Dashboard } from "./pages/dashboard/Dashboard"
 import { ProjectDashboard } from "./pages/dashboard/ProjectDashboard"
+import ProtectedRoute from "./components/ProtectedRoute"
+import { Chat } from "./components/Chat"
+import { Tasks } from "./components/Tasks"
+import { ChangeLog } from "./components/ChangeLog"
+import { NewContribs } from "./components/NewContribs"
 
 export const UserContext = createContext<any>(null);
 
@@ -28,7 +33,6 @@ function App() {
       } else {
         setSession(session);
         setUser(session?.user ?? null);
-        console.log('Session fetched:', session);
       }
       setLoading(false); 
     };
@@ -38,7 +42,6 @@ function App() {
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        console.log('Auth state changed:', session);
       }
     );
 
@@ -58,8 +61,13 @@ function App() {
           <Routes>
             <Route path='/' element={<Home />}/>
             <Route path='/auth' element={<Auth />} />
-            <Route path='/dashboard' element={session ? <Dashboard /> : <Navigate to='/auth' />} />
-            <Route path="/projects/:projectId" element={session ? <ProjectDashboard /> : <Navigate to='/auth' />} />
+            <Route path='/dashboard' element={<ProtectedRoute><Dashboard/></ProtectedRoute>} />
+            <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDashboard/></ProtectedRoute>} >
+              <Route index element={<Chat />} />
+              <Route path='tasks' element={<Tasks />} />
+              <Route path='changelog' element={<ChangeLog/>} />
+              <Route path='add' element={<NewContribs />} />
+            </Route>
           </Routes>
       </div>
     </UserContext.Provider>

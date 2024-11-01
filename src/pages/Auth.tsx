@@ -75,7 +75,7 @@ export const Auth = () => {
           className="mb-4 p-2 border border-gray-300 rounded"
         />
       )}
-      <button onClick={handleAuth} className="px-4 py-2 bg-blue-600 text-white rounded">
+      <button onClick={handleAuth} className="px-4 py-2 bg-blue-600 text-black rounded">
         {isSignUp ? 'Sign Up' : 'Sign In'}
       </button>
       <button onClick={() => setIsSignUp(!isSignUp)} className="mt-4 text-blue-500">
