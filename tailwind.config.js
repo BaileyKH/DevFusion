@@ -11,9 +11,9 @@ export default {
       },
       colors: {
         primLight: "#f8f8f8",
-        primDark: "#0f0f0f",
-        primAccent: "#7e00ff",
-        secAccent: "#ae60ff"
+        primDark: "#110F18",
+        primAccent: "#7255B1",
+        secAccent: "#15141B"
       },
     },
   },
