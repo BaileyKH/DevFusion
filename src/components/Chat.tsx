@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, useRef } from 'react';
+import { FixedSizeList as List } from 'react-window';
 import { supabase } from '../supabaseDB';
 import { UserContext } from '../App';
 import { useParams } from 'react-router-dom';
@@ -20,7 +21,7 @@ interface ChatMessage {
       }[];
 }
 
-export const Chat = () => {
+const Chat = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const user = useContext(UserContext);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -31,6 +32,7 @@ export const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesListRef = useRef<HTMLDivElement>(null);
 
+  // Helper function to normalize message data
   const normalizeMessageData = (message: any): ChatMessage => {
     if (Array.isArray(message.user)) {
       message.user = message.user[0];
@@ -38,6 +40,7 @@ export const Chat = () => {
     return message as ChatMessage;
   };
 
+  // Fetch messages from the database
   const fetchMessages = async (cursor?: string) => {
     let query = supabase
       .from('chat_messages')
@@ -194,75 +197,83 @@ export const Chat = () => {
   // Regular expression to detect code blocks
   const codeBlockRegex = /```([\s\S]*?)```/g;
 
+  // Row component for react-window to virtualize messages
+  const Row = ({ index, style }: { index: number; style: any }) => {
+    const message = messages[index];
+    const messageUser = Array.isArray(message.user) ? message.user[0] : message.user;
+    const hasCodeBlock = codeBlockRegex.test(message.content);
+
+    return (
+      <div
+        key={message.id}
+        className={`message ${message.user_id === user.id ? 'sent' : 'received'} my-4`}
+        style={style} // Style provided by react-window
+      >
+        <div className="flex gap-x-4">
+          <p className="font-bold">{messageUser.username}</p>
+          <small>
+            {new Date(message.created_at).toLocaleTimeString([], {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            })}
+          </small>
+        </div>
+        <div>
+          {hasCodeBlock ? (
+            (() => {
+              codeBlockRegex.lastIndex = 0;
+              const parts = message.content.split(codeBlockRegex);
+              return parts.map((part, index) => {
+                if (index % 2 === 1) {
+                  return (
+                    <SyntaxHighlighter
+                      key={index}
+                      language=""
+                      style={atelierCaveDark}
+                      showLineNumbers
+                      className="rounded-md"
+                    >
+                      {part}
+                    </SyntaxHighlighter>
+                  );
+                } else {
+                  return part ? <p key={index}>{part}</p> : null;
+                }
+              });
+            })()
+          ) : (
+            <p>{message.content}</p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full h-full">
-      <div
-        className=""
-        ref={messagesListRef}
-        style={{ overflowY: 'scroll', maxHeight: '80vh' }}
-        onScroll={handleScroll}
+      <List
+        height={600}
+        itemCount={messages.length}
+        itemSize={100} 
+        width="100%"
       >
-        {loadingMore && <p>Loading more messages...</p>}
-        {messages.map((message) => {
-          const messageUser = Array.isArray(message.user) ? message.user[0] : message.user;
-          const hasCodeBlock = codeBlockRegex.test(message.content);
-
-          return (
-            <div
-              key={message.id}
-              className={`message ${message.user_id === user.id ? 'sent' : 'received'} my-4`}
-            >
-              <div className="flex gap-x-4">
-                <p className="font-bold">{messageUser.username}</p>
-                <small>
-                  {new Date(message.created_at).toLocaleTimeString([], {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true,
-                  })}
-                </small>
-              </div>
-              <div>
-                {hasCodeBlock ? (
-                  (() => {
-                    codeBlockRegex.lastIndex = 0;
-                    const parts = message.content.split(codeBlockRegex);
-                    return parts.map((part, index) => {
-                      if (index % 2 === 1) {
-                        return (
-                          <SyntaxHighlighter
-                            key={index}
-                            language=""
-                            style={atelierCaveDark}
-                            showLineNumbers
-                            className="rounded-md"
-                          >
-                            {part}
-                          </SyntaxHighlighter>
-                        );
-                      } else {
-                        return part ? <p key={index}>{part}</p> : null;
-                      }
-                    });
-                  })()
-                ) : (
-                  <p>{message.content}</p>
-                )}
-              </div>
-            </div>
-          );
-        })}
-        <div ref={messagesEndRef} />
-      </div>
-      <form onSubmit={handleSendMessage} className="message-input border-t-2 border-primDark">
+        {Row}
+      </List>
+      <form onSubmit={handleSendMessage} className="message-input border-t-2 border-primDark flex flex-col items-start p-4">
         <textarea
           placeholder="Type your message..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          className="w-3/4 h-8 mt-4 p-2 bg-transparent border border-primDark rounded-md mr-4 placeholder:text-xs"
+          className="w-full mt-2 p-2 bg-transparent border border-primDark rounded-md mr-4 placeholder:text-xs"
         />
-        <button type="submit">Send</button>
+        <button type="submit" className="mt-2 p-2 bg-blue-500 text-white rounded-md">
+          Send
+        </button>
       </form>
     </div>
   );
 };
+
+
+export default Chat;
