@@ -17,7 +17,7 @@ interface ProjectMember {
   username: string;
 }
 
-export const Tasks = () => {
+const Tasks = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const user = useContext(UserContext);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -167,3 +167,5 @@ export const Tasks = () => {
     </div>
   );
 };
+
+export default Tasks;
