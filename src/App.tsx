@@ -10,6 +10,7 @@ import { Dashboard } from "./pages/dashboard/Dashboard";
 import { ProjectDashboard } from "./pages/dashboard/ProjectDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { NewContribs } from "./components/NewContribs";
+import { GithubRedirect } from "./components/GithubRedirect";
 
 const Chat = lazy(() => import("./components/Chat"));
 const Tasks = lazy(() => import("./components/Tasks"));
@@ -61,6 +62,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/github/success" element={<GithubRedirect />} />
           <Route
             path="/dashboard"
             element={
