@@ -1,8 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
-
 import { UserContext } from '../../App';
 import { supabase } from '../../supabaseDB';
-
 import { NewProject } from '../../components/NewProject';
 import { ProjectCard } from '../../components/ProjectCard';
 
@@ -10,6 +8,29 @@ export const Dashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const user = useContext(UserContext);
+  const [isGitHubConnected, setIsGitHubConnected] = useState(false);
+
+  useEffect(() => {
+    const githubToken = localStorage.getItem('github_token');
+    if (githubToken) {
+      fetch('https://api.github.com/user', {
+        headers: {
+          Authorization: `token ${githubToken}`,
+        },
+      })
+        .then(response => {
+          if (response.ok) {
+            setIsGitHubConnected(true);
+          } else {
+            console.warn('GitHub token is expired or invalid.');
+            setIsGitHubConnected(false);
+          }
+        })
+        .catch(() => setIsGitHubConnected(false));
+    } else {
+      setIsGitHubConnected(false);
+    }
+  }, []);
 
   const fetchProjects = async () => {
     if (!user) {
@@ -25,7 +46,6 @@ export const Dashboard = () => {
       console.error('Error fetching projects:', error);
       alert(`Error fetching projects: ${error.message}`);
     } else {
-      console.log('User projects fetched:', data);
       setProjects(data);
     }
   };
@@ -48,12 +68,19 @@ export const Dashboard = () => {
     }
   }, [user]);
 
-  console.log('Projects:', projects);
-
-
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Your Projects</h1>
+      {!isGitHubConnected && (
+        <button
+          className="mb-4 p-2 bg-green-500 text-white rounded"
+          onClick={() =>
+            window.location.href = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&scope=repo`
+          }
+        >
+          Connect to GitHub
+        </button>
+      )}
       <button
         className="mb-4 p-2 bg-blue-500 text-white rounded"
         onClick={() => setIsModalOpen(true)}
