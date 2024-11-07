@@ -24,17 +24,21 @@ export const NewProject: React.FC<NewProjectProps> = ({
 
   useEffect(() => {
     const fetchRepos = async () => {
-      if (connectToGitHub && localStorage.getItem('github_token')) {
-        try {
-          const token = localStorage.getItem('github_token');
-          const response = await axios.get('https://api.github.com/user/repos', {
-            headers: {
-              Authorization: `token ${token}`,
-            },
-          });
-          setRepos(response.data);
-        } catch (error) {
-          console.error('Error fetching repos:', error);
+      if (connectToGitHub) {
+        const githubToken = localStorage.getItem('github_token');
+        if (githubToken) {
+          try {
+            const response = await axios.get('https://api.github.com/user/repos', {
+              headers: {
+                Authorization: `token ${githubToken}`,
+              },
+            });
+            setRepos(response.data);
+          } catch (error) {
+            console.error('Error fetching repos:', error);
+          }
+        } else {
+          console.warn('GitHub token missing or connectToGitHub is false');
         }
       }
     };
@@ -52,28 +56,41 @@ export const NewProject: React.FC<NewProjectProps> = ({
       return;
     }
 
-    const { data, error } = await supabase.rpc('create_project_with_membership', {
-      _name: projectName,
-      _description: projectDescription,
-      _owner_id: user.id,
-    });
+    try {
+      const { data, error } = await supabase.rpc('create_project_with_membership', {
+        _name: projectName,
+        _description: projectDescription,
+        _owner_id: user.id,
+      });
 
-    if (error) {
-      console.error('Error creating project:', error);
-      alert(`Error creating project: ${error.message}`);
-    } else {
-      console.log('Project created:', data);
-      if (connectToGitHub && selectedRepo) {
-        // Save repo details with the project in your database
-        await supabase
-          .from('projects')
-          .update({ github_repo_url: selectedRepo })
-          .eq('id', data.id);
+      if (error) {
+        console.error('Error creating project:', error);
+        alert(`Error creating project: ${error.message}`);
+      } else if (data) {
+        console.log('Project created successfully:', data);
+        if (connectToGitHub && selectedRepo) {
+          const { error: updateError } = await supabase
+            .from('projects')
+            .update({ github_repo_url: selectedRepo })
+            .eq('id', data.id);
+
+          if (updateError) {
+            console.error('Error saving GitHub repository details to the project:', updateError);
+            alert('Error saving GitHub repository details to the project.');
+          } else {
+            console.log('GitHub repository details saved successfully to the project.');
+          }
+        }
+
+        onProjectCreated(data);
+        onClose();
       }
-      onProjectCreated(data);
-      onClose();
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert('An unexpected error occurred while creating the project.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (!isOpen) return null;
