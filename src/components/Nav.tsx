@@ -23,7 +23,10 @@ export const Nav = () => {
       </Link>
       <div>
         {user ? (
-          <button onClick={handleSignOut}>Sign Out</button>
+          <div className="flex items-center gap-x-4">
+            <button onClick={() => navigate("/dashboard")}>Dashboard</button>
+            <button onClick={handleSignOut}>Sign Out</button>
+          </div>
         ) : (
           <button onClick={() => navigate("/auth")}>Sign In</button>
         )}
