@@ -12,16 +12,14 @@ interface ChatMessage {
   user_id: string;
   content: string;
   created_at: string;
-  user:
-    | {
-        username: string;
-      }
-    | {
-        username: string;
-      }[];
+  user: {
+    username: string;
+    avatar_url?: string;
+    display_color?: string; // Added display_color property
+  };
 }
 
-const Chat = () => {
+export const Chat = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const user = useContext(UserContext);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -29,10 +27,8 @@ const Chat = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesListRef = useRef<HTMLDivElement>(null);
+  const messagesListRef = useRef<any>(null);
 
-  // Helper function to normalize message data
   const normalizeMessageData = (message: any): ChatMessage => {
     if (Array.isArray(message.user)) {
       message.user = message.user[0];
@@ -40,7 +36,6 @@ const Chat = () => {
     return message as ChatMessage;
   };
 
-  // Fetch messages from the database
   const fetchMessages = async (cursor?: string) => {
     let query = supabase
       .from('chat_messages')
@@ -50,7 +45,9 @@ const Chat = () => {
         content,
         created_at,
         user:user_id (
-          username
+          username,
+          avatar_url,
+          display_color
         )
       `)
       .eq('project_id', projectId)
@@ -81,46 +78,27 @@ const Chat = () => {
     }
   };
 
-  const handleScroll = () => {
-    if (!messagesListRef.current) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = messagesListRef.current;
-
-    // Determine if user scrolled to the top to load more messages
-    if (scrollTop === 0 && !loadingMore && hasMore) {
-      loadMoreMessages();
-    }
-
-    // Check if user is at the bottom
-    const atBottom = scrollHeight - scrollTop <= clientHeight + 1;
-    setIsAtBottom(atBottom);
-  };
-
   const loadMoreMessages = async () => {
     if (loadingMore) return;
 
     setLoadingMore(true);
-    const messagesList = messagesListRef.current;
-    const scrollHeightBefore = messagesList?.scrollHeight || 0;
 
     const oldestMessage = messages[0];
     const cursor = oldestMessage.created_at;
     await fetchMessages(cursor);
     setLoadingMore(false);
-
-    const scrollHeightAfter = messagesList?.scrollHeight || 0;
-    if (messagesList) {
-      messagesList.scrollTop = scrollHeightAfter - scrollHeightBefore;
-    }
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesListRef.current) {
+      messagesListRef.current.scrollToItem(messages.length - 1, 'end');
+    }
   };
 
   useEffect(() => {
     fetchMessages();
 
+    // Real-time subscription for new chat messages
     const channel = supabase
       .channel(`public:chat_messages_project_${projectId}`)
       .on(
@@ -140,7 +118,9 @@ const Chat = () => {
               content,
               created_at,
               user:user_id (
-                username
+                username,
+                avatar_url,
+                display_color
               )
             `)
             .eq('id', payload.new.id)
@@ -149,13 +129,47 @@ const Chat = () => {
           if (newMessageData) {
             const normalizedMessage = normalizeMessageData(newMessageData);
             setMessages((prevMessages) => [...prevMessages, normalizedMessage]);
+            if (isAtBottom) {
+              scrollToBottom();
+            }
           }
+        }
+      )
+      .subscribe();
+
+    // Real-time subscription for changes in user profiles (avatar or display color)
+    const userChannel = supabase
+      .channel('public:users')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'users',
+        },
+        async (payload) => {
+          const updatedUser = payload.new;
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.user_id === updatedUser.id
+                ? {
+                    ...msg,
+                    user: {
+                      ...msg.user,
+                      avatar_url: updatedUser.avatar_url,
+                      display_color: updatedUser.display_color,
+                    },
+                  }
+                : msg
+            )
+          );
         }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(userChannel);
     };
   }, [projectId]);
 
@@ -165,7 +179,6 @@ const Chat = () => {
     }
   }, [messages]);
 
-  // Code detection function
   const isProbablyCode = (text: string): boolean => {
     const hasMultipleLines = text.trim().includes('\n');
     const codeIndicators = ['{', '}', '=>', ';', 'function', 'const', 'let', 'var', 'class', 'import', '#include', 'def', 'if', 'else'];
@@ -194,57 +207,73 @@ const Chat = () => {
     }
   };
 
-  // Regular expression to detect code blocks
   const codeBlockRegex = /```([\s\S]*?)```/g;
 
-  // Row component for react-window to virtualize messages
   const Row = ({ index, style }: { index: number; style: any }) => {
     const message = messages[index];
-    const messageUser = Array.isArray(message.user) ? message.user[0] : message.user;
+    const messageUser = message.user;
     const hasCodeBlock = codeBlockRegex.test(message.content);
 
     return (
       <div
         key={message.id}
         className={`message ${message.user_id === user.id ? 'sent' : 'received'} my-4`}
-        style={style} // Style provided by react-window
+        style={style}
       >
-        <div className="flex gap-x-4">
-          <p className="font-bold">{messageUser.username}</p>
-          <small>
-            {new Date(message.created_at).toLocaleTimeString([], {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            })}
-          </small>
-        </div>
-        <div>
-          {hasCodeBlock ? (
-            (() => {
-              codeBlockRegex.lastIndex = 0;
-              const parts = message.content.split(codeBlockRegex);
-              return parts.map((part, index) => {
-                if (index % 2 === 1) {
-                  return (
-                    <SyntaxHighlighter
-                      key={index}
-                      language=""
-                      style={atelierCaveDark}
-                      showLineNumbers
-                      className="rounded-md"
-                    >
-                      {part}
-                    </SyntaxHighlighter>
-                  );
-                } else {
-                  return part ? <p key={index}>{part}</p> : null;
-                }
-              });
-            })()
-          ) : (
-            <p>{message.content}</p>
-          )}
+        <div className="flex items-center gap-x-4">
+          <div>
+            {messageUser.avatar_url && (
+              <img
+                src={messageUser.avatar_url}
+                alt="Avatar"
+                className="h-9 w-9 rounded-full"
+              />
+            )}
+          </div>
+          <div>
+            <div className='flex gap-x-4 items-center'>
+              <p
+                className="font-bold text-sm"
+                style={{ color: messageUser.display_color ?? '#FFF' }}
+              >
+                {messageUser.username}
+              </p>
+              <small className='text-white/50'>
+                {new Date(message.created_at).toLocaleTimeString([], {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                })}
+              </small>
+            </div>
+            <div className='mt-1'>
+              {hasCodeBlock ? (
+                (() => {
+                  codeBlockRegex.lastIndex = 0;
+                  const parts = message.content.split(codeBlockRegex);
+                  return parts.map((part, index) => {
+                    if (index % 2 === 1) {
+                      return (
+                        <SyntaxHighlighter
+                          key={index}
+                          language=""
+                          style={atelierCaveDark}
+                          showLineNumbers
+                          className="rounded-md"
+                        >
+                          {part}
+                        </SyntaxHighlighter>
+                      );
+                    } else {
+                      return part ? <p key={index}>{part}</p> : null;
+                    }
+                  });
+                })()
+              ) : (
+                <p className='text-sm'>{message.content}</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -255,19 +284,25 @@ const Chat = () => {
       <List
         height={600}
         itemCount={messages.length}
-        itemSize={100} 
+        itemSize={100}
         width="100%"
+        ref={messagesListRef}
+        onItemsRendered={({ visibleStopIndex }) => {
+          if (visibleStopIndex === messages.length - 1) {
+            setIsAtBottom(true);
+          }
+        }}
       >
         {Row}
       </List>
-      <form onSubmit={handleSendMessage} className="message-input border-t-2 border-primDark flex flex-col items-start p-4">
+      <form onSubmit={handleSendMessage} className="border-t-2 border-primDark flex items-center py-4">
         <textarea
           placeholder="Type your message..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          className="w-full mt-2 p-2 bg-transparent border border-primDark rounded-md mr-4 placeholder:text-xs"
+          className="w-full h-12 mt-2 p-2 bg-transparent border border-primDark rounded-md mr-4 placeholder:text-xs placeholder:text-darkAccent resize-none"
         />
-        <button type="submit" className="mt-2 p-2 bg-blue-500 text-white rounded-md">
+        <button type="submit" className="mt-2 p-2 bg-primAccent hover:bg-red-950 transition duration-300 text-lightAccent rounded-md">
           Send
         </button>
       </form>
@@ -275,5 +310,6 @@ const Chat = () => {
   );
 };
 
-
 export default Chat;
+
+
