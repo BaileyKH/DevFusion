@@ -4,7 +4,7 @@
 
 @layer base {
     body {
-        @apply bg-secAccent
+        @apply bg-secDark text-lightAccent
     }
 
     .project-nav-ico {
