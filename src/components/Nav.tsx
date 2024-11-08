@@ -19,7 +19,7 @@ export const Nav = () => {
 
   return (
     <>
-      <nav className="flex justify-between p-4 bg-secDark text-lightAccent shadow-md nav-gradient">
+      <nav className="flex justify-between items-center p-4 bg-secDark text-lightAccent shadow-md nav-gradient">
         <Link to="/" className="text-2xl font-bold text-lightAccent">
           DevFusion
         </Link>
