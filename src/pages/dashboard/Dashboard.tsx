@@ -4,7 +4,7 @@ import { supabase } from '../../supabaseDB';
 import { NewProject } from '../../components/NewProject';
 import { ProjectCard } from '../../components/ProjectCard';
 
-export const Dashboard = () => {
+const Dashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const user = useContext(UserContext);
@@ -40,7 +40,7 @@ export const Dashboard = () => {
 
     const { data, error } = await supabase
       .from('user_projects')
-      .select('id, name, description, github_repo_url');
+      .select('id, name, description, github_repo_url')
 
     if (error) {
       console.error('Error fetching projects:', error);
@@ -70,23 +70,25 @@ export const Dashboard = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Your Projects</h1>
-      {!isGitHubConnected && (
+      <div className='flex justify-between items-center'>
+        <h1 className="text-2xl font-bold mb-4 text-lightAccent">Your Projects</h1>
+        {!isGitHubConnected && (
+          <button
+            className="mb-4 p-2 bg-green-500 text-white rounded"
+            onClick={() =>
+              window.location.href = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&scope=repo`
+            }
+          >
+            Connect to GitHub
+          </button>
+        )}
         <button
-          className="mb-4 p-2 bg-green-500 text-white rounded"
-          onClick={() =>
-            window.location.href = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&scope=repo`
-          }
+          className="mb-4 p-2 bg-primAccent hover:bg-red-950 transition duration-300 text-lightAccent rounded"
+          onClick={() => setIsModalOpen(true)}
         >
-          Connect to GitHub
+          New Project
         </button>
-      )}
-      <button
-        className="mb-4 p-2 bg-blue-500 text-white rounded"
-        onClick={() => setIsModalOpen(true)}
-      >
-        + New Project
-      </button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {projects.map((project) => (
           <ProjectCard key={project.id} project={project} onDelete={handleProjectDeleted} />
@@ -100,3 +102,5 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+export default Dashboard;
