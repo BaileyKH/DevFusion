@@ -29,7 +29,22 @@
 @layer base {
   
   body {
-    @apply bg-primLight dark:bg-primDark font-fira text-primDark dark:text-primLight h-full scroll-smooth
+    @apply bg-secDark font-fira h-full scroll-smooth
+  }
+
+  .nav-gradient {
+    position: relative;
+    padding-bottom: 1px;
+  }
+
+  .nav-gradient::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: radial-gradient(circle, #931621, #0f0f0f);
   }
 
 }
