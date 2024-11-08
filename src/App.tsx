@@ -6,15 +6,16 @@ import { supabase } from "./supabaseDB";
 import { Nav } from "./components/Nav";
 import { Home } from "./pages/Home";
 import { Auth } from "./pages/Auth";
-import { Dashboard } from "./pages/dashboard/Dashboard";
-import { ProjectDashboard } from "./pages/dashboard/ProjectDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { NewContribs } from "./components/NewContribs";
 import { GithubRedirect } from "./components/GithubRedirect";
+import { LoadingSkely } from "./components/LoadingSkely";
 
 const Chat = lazy(() => import("./components/Chat"));
 const Tasks = lazy(() => import("./components/Tasks"));
 const ChangeLog = lazy(() => import("./components/ChangeLog"));
+const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"))
+const ProjectDashboard = lazy(() => import("./pages/dashboard/ProjectDashboard"))
 
 export const UserContext = createContext<any>(null);
 
@@ -32,28 +33,47 @@ function App() {
       if (error) {
         console.error("Error fetching session:", error);
       } else {
-        setSession(session);
-        setUser(session?.user ?? null);
+        if (session) {
+          const { data: userProfile, error: userError } = await supabase
+            .from('users')
+            .select('username, email, avatar_url, display_color')
+            .eq('id', session.user.id)
+            .single();
+  
+          if (userError) {
+            console.error('Error fetching user profile:', userError);
+          } else {
+            setUser({ ...session.user, ...userProfile });
+          }
+        } else {
+          setUser(null);
+        }
       }
       setLoading(false);
     };
     fetchSession();
-
+  
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
+        if (session) {
+          fetchSession();
+        } else {
+          setUser(null);
+        }
       }
     );
-
+  
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
+  
 
   if (loading) {
     return <div>Loading...</div>;
   }
+
 
   return (
     <UserContext.Provider value={user}>
@@ -66,7 +86,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <Suspense fallback={<div>Loading Dashboard...</div>}>
+              <Suspense fallback={<LoadingSkely />}>
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
@@ -76,7 +96,7 @@ function App() {
           <Route
             path="/projects/:projectId"
             element={
-              <Suspense fallback={<div>Loading Project Dashboard...</div>}>
+              <Suspense fallback={<LoadingSkely />}>
                 <ProtectedRoute>
                   <ProjectDashboard />
                 </ProtectedRoute>
@@ -86,7 +106,7 @@ function App() {
             <Route
               index
               element={
-                <Suspense fallback={<div>Loading Chat...</div>}>
+                <Suspense fallback={<LoadingSkely />}>
                   <Chat />
                 </Suspense>
               }
@@ -94,7 +114,7 @@ function App() {
             <Route
               path="tasks"
               element={
-                <Suspense fallback={<div>Loading Tasks...</div>}>
+                <Suspense fallback={<LoadingSkely />}>
                   <Tasks />
                 </Suspense>
               }
@@ -102,7 +122,7 @@ function App() {
             <Route
               path="changelog"
               element={
-                <Suspense fallback={<div>Loading Change Log...</div>}>
+                <Suspense fallback={<LoadingSkely />}>
                   <ChangeLog />
                 </Suspense>
               }
