@@ -10,10 +10,14 @@ export default {
         fira: ['"Fira Code"', 'monospace'],
       },
       colors: {
-        primLight: "#f8f8f8",
-        primDark: "#110F18",
-        primAccent: "#7255B1",
-        secAccent: "#15141B"
+        primDark: "#000000",
+        secDark: "#0f0f0f",
+        primAccent: "#931621",
+        lightAccent: "#c8c8c8",
+        darkAccent: "#b3b3b3",
+      },
+      backgroundImage: {
+        'radial-bg': 'radial-gradient(circle, #450a0a, #000000)',
       },
     },
   },
