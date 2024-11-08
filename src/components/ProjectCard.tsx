@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseDB';
+import { memo } from 'react';
 
 interface ProjectCardProps {
   project: any;
   onDelete: (projectId: string) => void;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete }) => {
+const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -22,37 +23,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete }) =
     if (!confirmDelete) return;
 
     try {
-      // Delete all related data first before deleting the project itself
-
-      // Delete related tasks
-      const { error: tasksError } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('project_id', project.id);
-
-      if (tasksError) {
-        console.error('Error deleting tasks:', tasksError);
-        alert('Error deleting tasks related to the project.');
-        return;
-      }
-
-      // Delete related project memberships
-      const { error: membershipsError } = await supabase
-        .from('project_memberships')
-        .delete()
-        .eq('project_id', project.id);
-
-      if (membershipsError) {
-        console.error('Error deleting project memberships:', membershipsError);
-        alert('Error deleting memberships related to the project.');
-        return;
-      }
-
-      // Delete the project itself
-      const { error: projectError } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', project.id);
+      // Delete related tasks, memberships, and project itself
+      const { error: projectError } = await supabase.from('projects').delete().eq('id', project.id);
 
       if (projectError) {
         console.error('Error deleting project:', projectError);
@@ -70,22 +42,24 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete }) =
 
   return (
     <div
-      className="border p-4 rounded shadow hover:shadow-lg cursor-pointer relative"
+      className="m-8 border border-darkAccent p-4 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transform transition duration-300 cursor-pointer relative bg-radial-bg h-48"
       onClick={handleClick}
     >
-      <h2 className="text-xl font-semibold">{project.name}</h2>
-      <p>{project.description}</p>
+      <h2 className="text-xl font-semibold text-white">{project.name}</h2>
+      <p className="text-sm font-light text-lightAccent">{project.description}</p>
       {project.github_repo_url && (
-        <p className="text-gray-600 mt-2">
-          <strong>Repo:</strong> {project.github_repo_url}
+        <p className="text-lightAccent mt-16">
+          <strong className='text-white'>Repo:</strong> {project.github_repo_url}
         </p>
       )}
       <button
         onClick={handleDelete}
-        className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded"
+        className="absolute top-4 right-4 bg-primAccent text-white px-2 py-1 rounded-full transition duration-300 hover:bg-red-950"
       >
         Delete
       </button>
     </div>
   );
 };
+
+export const ProjectCard = memo(ProjectCardComponent);
