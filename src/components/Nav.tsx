@@ -1,6 +1,5 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseDB";
 import { UserContext } from "../App";
 import { IconUserCircle } from '@tabler/icons-react';
 import { ProfileModal } from "./ProfileModal";
@@ -9,13 +8,6 @@ export const Nav = () => {
   const user = useContext(UserContext);
   const navigate = useNavigate();
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-
-  const handleSignOut = async () => {
-    if (user) {
-      await supabase.auth.signOut();
-      navigate('/auth');
-    }
-  };
 
   return (
     <>
@@ -40,12 +32,6 @@ export const Nav = () => {
                   onClick={() => setIsUserModalOpen(true)}
                 />
               )}
-              <button
-                onClick={handleSignOut}
-                className="bg-primAccent hover:bg-red-950 px-3 py-1 rounded-md transition duration-300"
-              >
-                Sign Out
-              </button>
             </>
           ) : (
             <button
