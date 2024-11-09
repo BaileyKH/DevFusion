@@ -46,5 +46,8 @@
     height: 1px;
     background: radial-gradient(circle, #931621, #0f0f0f);
   }
+  :root {
+    --radius: 0.5rem; 
+  }
 
 }
