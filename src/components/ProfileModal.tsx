@@ -27,6 +27,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
 
   if (!isOpen) return null;
 
+  const handleSignOut = async () => {
+    if (user) {
+      await supabase.auth.signOut();
+      onClose(); 
+      window.location.href = "/"; 
+    }
+  };
+
   // Handle avatar file upload
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -209,6 +217,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
             className="p-2 bg-red-500 text-white rounded"
           >
             Disconnect from GitHub
+          </button>
+        </div>
+        <div className="mb-4">
+          <button
+            onClick={handleSignOut}
+            className="p-2 bg-red-600 text-white rounded"
+          >
+            Sign Out
           </button>
         </div>
         <div className="flex justify-end">
