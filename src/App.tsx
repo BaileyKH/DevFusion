@@ -1,6 +1,5 @@
 import { useState, useEffect, createContext, Suspense, lazy } from "react"; 
-import { Route, Routes } from "react-router-dom";
-
+import { Route, Routes, useLocation } from "react-router-dom";
 import { supabase } from "./supabaseDB";
 
 import { Nav } from "./components/Nav";
@@ -14,8 +13,8 @@ import { LoadingSkely } from "./components/LoadingSkely";
 const Chat = lazy(() => import("./components/Chat"));
 const Tasks = lazy(() => import("./components/Tasks"));
 const ChangeLog = lazy(() => import("./components/ChangeLog"));
-const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"))
-const ProjectDashboard = lazy(() => import("./pages/dashboard/ProjectDashboard"))
+const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
+const ProjectDashboard = lazy(() => import("./pages/dashboard/ProjectDashboard"));
 
 export const UserContext = createContext<any>(null);
 
@@ -23,6 +22,7 @@ function App() {
   const [session, setSession] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -74,11 +74,12 @@ function App() {
     return <div>Loading...</div>;
   }
 
+  const isProjectDashboard = location.pathname.startsWith('/projects');
 
   return (
     <UserContext.Provider value={user}>
       <div>
-        <Nav />
+        {!isProjectDashboard && <Nav />}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
@@ -136,5 +137,3 @@ function App() {
 }
 
 export default App;
-
-
