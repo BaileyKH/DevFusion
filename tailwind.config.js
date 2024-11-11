@@ -14,7 +14,7 @@ export default {
   			primDark: '#000000',
   			secDark: '#0f0f0f',
   			primAccent: '#931621',
-  			lightAccent: '#c8c8c8',
+  			lightAccent: '#FFFFFF',
   			darkAccent: '#b3b3b3'
   		},
   		backgroundImage: {
