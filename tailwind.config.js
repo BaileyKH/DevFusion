@@ -12,7 +12,7 @@ export default {
   		},
   		colors: {
   			primDark: '#000000',
-  			secDark: '#0f0f0f',
+  			secDark: '#080808',
   			primAccent: '#931621',
   			lightAccent: '#FFFFFF',
   			darkAccent: '#b3b3b3'
@@ -26,7 +26,9 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		animation: {
-  			'background-position-spin': 'background-position-spin 3000ms infinite alternate'
+  			'background-position-spin': 'background-position-spin 3000ms infinite alternate',
+  			'border-beam': 'border-beam calc(var(--duration)*1s) infinite linear',
+  			shine: 'shine var(--duration) infinite linear'
   		},
   		keyframes: {
   			'background-position-spin': {
@@ -35,6 +37,22 @@ export default {
   				},
   				'100%': {
   					backgroundPosition: 'bottom center'
+  				}
+  			},
+  			'border-beam': {
+  				'100%': {
+  					'offset-distance': '100%'
+  				}
+  			},
+  			shine: {
+  				'0%': {
+  					'background-position': '0% 0%'
+  				},
+  				'50%': {
+  					'background-position': '100% 100%'
+  				},
+  				to: {
+  					'background-position': '0% 0%'
   				}
   			}
   		}
