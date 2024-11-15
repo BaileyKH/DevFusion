@@ -19,18 +19,24 @@ export const Nav = () => {
           {user ? (
             <>
               {user.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt="User Avatar"
-                  className="h-10 w-10 rounded-full cursor-pointer border border-darkAccent"
-                  onClick={() => setIsUserModalOpen(true)}
-                />
+                <div className="flex items-center gap-x-8">
+                  <Link to='/dashboard' className="tracking-wider hover:text-primAccent hover:underline underline-offset-4 transition duration-200 ease-in">Dashboard</Link>
+                  <img
+                    src={user.avatar_url}
+                    alt="User Avatar"
+                    className="h-10 w-10 rounded-full cursor-pointer border border-darkAccent"
+                    onClick={() => setIsUserModalOpen(true)}
+                  />
+                </div>
               ) : (
-                <IconUserCircle
-                  size={28}
-                  className="text-white cursor-pointer"
-                  onClick={() => setIsUserModalOpen(true)}
-                />
+                <div className="flex items-center gap-x-8">
+                  <Link to='/dashboard'>Dashboard</Link>
+                  <IconUserCircle
+                    size={28}
+                    className="text-white cursor-pointer"
+                    onClick={() => setIsUserModalOpen(true)}
+                  />
+                </div>
               )}
             </>
           ) : (
