@@ -4,6 +4,17 @@ import { supabase } from '../supabaseDB';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import ShineBorder from "@/components/ui/shine-border";
+
 const ChangeLog = () => {
   const user = useContext(UserContext);
   const { projectId } = useParams<{ projectId: string }>();
@@ -59,28 +70,44 @@ const ChangeLog = () => {
       {commits.length === 0 ? (
         <p>No commits found for this repository.</p>
       ) : (
-        <ul>
-          {commits.map((commit: any, index: number) => (
-            <li key={index} className="mb-4">
-              <p>
-                <strong>{commit.commit.author.name}</strong> committed on{' '}
-                {new Date(commit.commit.author.date).toLocaleDateString()}:
-              </p>
-              <p>{commit.commit.message}</p>
-              <a
-                href={commit.html_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline"
-              >
-                View Commit
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div className='bg-primDark rounded-lg'>
+          <ShineBorder borderWidth={1} color={'#931621'} className='w-full p-4'>
+          <Table>
+          <TableCaption>A list of the most recent change logs.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px] font-bold tracking-wider">User</TableHead>
+              <TableHead className='font-bold tracking-wider'>Date</TableHead>
+              <TableHead className='font-bold tracking-wider'>Commit</TableHead>
+              <TableHead className="text-right font-bold tracking-wider">View Commit</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {commits.map((commit: any, index: number) => (
+                <TableRow key={index}>
+                  <TableCell className='text-lightAccent'>{commit.commit.author.name}</TableCell>
+                  <TableCell className='text-lightAccent'>{new Date(commit.commit.author.date).toLocaleDateString()}</TableCell>
+                  <TableCell className='text-lightAccent'>{commit.commit.message}</TableCell>
+                  <TableCell className="text-right">        <a
+                  href={commit.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-lightAccent hover:text-primAccent underline underline-offset-4"
+                >
+                  View Commit
+                </a></TableCell>
+                </TableRow>
+            ))}
+          </TableBody>
+          </Table>
+          </ShineBorder>
+        </div>
       )}
     </div>
   );
 };
 
 export default ChangeLog;
+
+
+

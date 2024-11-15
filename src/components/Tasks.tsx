@@ -3,6 +3,11 @@ import { supabase } from '../supabaseDB';
 import { UserContext } from '../App';
 import { useParams } from 'react-router-dom';
 
+import { IconPlus, IconUserCircle, IconTrash } from '@tabler/icons-react';
+
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+
 interface Task {
   id: string;
   project_id: string;
@@ -15,6 +20,7 @@ interface Task {
 interface ProjectMember {
   id: string;
   username: string;
+  avatar_url: string;
 }
 
 const Tasks = () => {
@@ -29,7 +35,7 @@ const Tasks = () => {
     const fetchMembers = async () => {
       const { data, error } = await supabase
         .from('project_memberships')
-        .select('user_id, users(username)')
+        .select('*, users(*)')
         .eq('project_id', projectId);
       
       if (error) {
@@ -38,6 +44,7 @@ const Tasks = () => {
         const membersData = data.map((item: any) => ({
           id: item.user_id,
           username: item.users.username,
+          avatar_url: item.users.avatar_url
         }));
         setMembers(membersData);
       }
@@ -91,7 +98,7 @@ const Tasks = () => {
       .from('tasks')
       .update({ is_completed: !isCompleted })
       .eq('id', taskId)
-      .eq('user_id', user.id); // Ensure users can only update their own tasks
+      .eq('user_id', user.id); 
 
     if (error) {
       console.error('Error updating task:', error);
@@ -109,7 +116,7 @@ const Tasks = () => {
       .from('tasks')
       .delete()
       .eq('id', taskId)
-      .eq('user_id', user.id); // Ensure users can only delete their own tasks
+      .eq('user_id', user.id); 
 
     if (error) {
       console.error('Error deleting task:', error);
@@ -119,49 +126,58 @@ const Tasks = () => {
   };
 
   return (
-    <div className="flex gap-4 overflow-x-auto p-4">
+    <div className="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3 xl:gap-x-8 my-4 h-screen">
       {members.map((member) => (
-        <div key={member.id} className="flex-shrink-0 w-1/4 p-4 bg-primDark border border-gray-300 rounded-md">
-          <h2 className="font-bold mb-2">{member.username}</h2>
-          <ul>
+        <div key={member.id} className="overflow-hidden rounded-xl border border-darkAccent/65 ">
+          <div className='flex flex-col justify-center bg-secDark p-4 nav-gradient'>
+            <div className='flex items-end mb-4 gap-x-4'>
+              {member.avatar_url ? (
+                <img src={member.avatar_url} className="h-10 w-10 rounded-full"/> ) : (
+                <IconUserCircle stroke={1} className="h-10 w-10 rounded-full"/>
+              )}
+              <h2 className="font-bold mb-2">{member.username}</h2>
+            </div>
+            {member.id === user.id && (
+              <form onSubmit={(e) => handleAddTask(e, member.id)} className='flex'>
+                <Input
+                  type="text"
+                  value={newTask}
+                  onChange={(e) => setNewTask(e.target.value)}
+                  placeholder="New Task"
+                  className='w-64 placeholder:text-darkAccent/65 border-darkAccent/65'
+                />
+                <button type="submit">
+                  <IconPlus stroke={2} className='text-primAccent w-[6] h-[6] ml-3 border border-primAccent rounded-md hover:bg-red-200 transition-colors duration-200 ease-in'/>
+                </button>
+              </form>
+            )}
+          </div>
+          <ul className='bg-primDark p-4 h-full'>
             {tasks
               .filter((task) => task.user_id === member.id)
               .map((task) => (
-                <li key={task.id} className="mb-2">
-                  <input
-                    type="checkbox"
-                    checked={task.is_completed}
-                    onChange={() => handleToggleTask(task.id, task.is_completed)}
-                    disabled={task.user_id !== user.id}
-                  />
-                  <span className={`ml-2 ${task.is_completed ? 'line-through' : ''}`}>
-                    {task.description}
-                  </span>
+                <li key={task.id} className="flex justify-between items-center mb-2">
+                  <div className='flex items-center'>
+                    <Checkbox
+                      onCheckedChange={() => handleToggleTask(task.id, task.is_completed)}
+                      checked={task.is_completed}
+                      disabled={task.user_id !== user.id}
+                    />
+                    <span className={`ml-2 ${task.is_completed ? 'line-through' : ''}`}>
+                      {task.description}
+                    </span>
+                  </div>
                   {task.user_id === user.id && (
                     <button
                       className="ml-4 text-red-500"
                       onClick={() => handleDeleteTask(task.id)}
                     >
-                      Delete
+                      <IconTrash stroke={1} />
                     </button>
                   )}
                 </li>
               ))}
           </ul>
-          {member.id === user.id && (
-            <form onSubmit={(e) => handleAddTask(e, member.id)}>
-              <input
-                type="text"
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-                placeholder="New Task"
-                className="w-full p-2 border border-gray-400 rounded mt-2"
-              />
-              <button type="submit" className="mt-2 p-2 bg-primAccent text-white rounded">
-                Add Task
-              </button>
-            </form>
-          )}
         </div>
       ))}
     </div>

@@ -1,13 +1,17 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { UserContext } from '../../App';
+import { ProfileModal } from '../../components/ProfileModal';
 import { Outlet, NavLink, useParams } from 'react-router-dom';
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
 import './projectdash.css'
 
-import { IconX, IconMenu2, IconCaretLeft, IconBrandGithub, IconCheckbox, IconMessageDots, IconSquarePlus } from '@tabler/icons-react';
+import { IconX, IconMenu2, IconCaretLeft, IconBrandGithub, IconCheckbox, IconMessageDots, IconSquarePlus, IconUserCircle } from '@tabler/icons-react';
 
 const ProjectDashboard = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const user = useContext(UserContext);
 
   return (
     <div className='h-full'>
@@ -68,28 +72,59 @@ const ProjectDashboard = () => {
                   <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-red-950 border-none p-2 w-max rounded-md mt-16 transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
               </ul>
             </li>
+            <li className="-mx-6 mt-auto">
+              <div className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-lightAccent">
+                {user && user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt="User Avatar"
+                      className="h-10 w-10 rounded-full cursor-pointer border border-darkAccent"
+                      onClick={() => setIsUserModalOpen(true)}
+                    />
+                  ) : (
+                    <IconUserCircle
+                      size={28}
+                      className="text-lightAccent cursor-pointer"
+                      onClick={() => setIsUserModalOpen(true)}
+                    />
+                )}
+                  <span className="sr-only">Your profile</span>
+                  <span aria-hidden="true" className='text-lightAccent'>{user.username}</span>
+                </div>
+            </li>
+            {isUserModalOpen && (
+              <ProfileModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
+            )}
           </ul>
         </nav>
       </div>
     </div> 
 
-    <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-primDark px-4 py-4 shadow-sm sm:px-6 lg:hidden">
+    <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
       <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-gray-400 lg:hidden">
         <span className="sr-only">Open sidebar</span>
-        <IconMenu2 stroke={2} aria-hidden="true" className="h-6 w-6" />
+        <IconMenu2 aria-hidden="true" className="h-6 w-6" />
       </button>
       <div className="flex-1 text-sm/6 font-semibold text-white">Dashboard</div>
+        <span className="sr-only">Your profile</span>
+        <img
+          src={user.avatar_url}
+          alt="User Avatar"
+          className="h-8 w-8 rounded-full"
+          onClick={() => setIsUserModalOpen(true)}
+        />
+        {isUserModalOpen && (
+          <ProfileModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
+        )}
     </div>
 
-    <main className="py-6 lg:pl-72">
-      <div className="px-4 sm:px-6 lg:px-8"><Outlet /></div>
+    <main className="flex-grow overflow-hidden lg:pl-72">
+      <div className="h-full overflow-hidden px-4 sm:px-6 lg:px-8"><Outlet /></div>
     </main>
   </div>
   );
 };
 
 export default ProjectDashboard;
-
-
 
 

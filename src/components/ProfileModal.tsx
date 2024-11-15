@@ -2,6 +2,10 @@ import { useState, useContext, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseDB';
 import { UserContext } from '../App';
 
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,7 +13,7 @@ interface ProfileModalProps {
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const user = useContext(UserContext);
-  const [displayColor, setDisplayColor] = useState<string>('#000000');
+  const [displayColor, setDisplayColor] = useState<string>('#FFFFFF');
   const [email, setEmail] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>('');
@@ -19,13 +23,21 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
   // Sync initial state with user data when modal is open or user data changes
   useEffect(() => {
     if (user) {
-      setDisplayColor(user.display_color || '#000000');
-      setSelectedColor(user.chat_color || '#000000');
+      setDisplayColor(user.display_color || '#FFFFFF');
+      setSelectedColor(user.chat_color || '#FFFFFF');
       setEmail(user.email || '');
     }
   }, [user]);
 
   if (!isOpen) return null;
+
+  const handleSignOut = async () => {
+    if (user) {
+      await supabase.auth.signOut();
+      onClose(); 
+      window.location.href = "/"; 
+    }
+  };
 
   // Handle avatar file upload
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,73 +162,68 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
-        <h2 className="text-xl font-bold mb-4">User Settings</h2>
+      <div className='bg-primDark border border-darkAccent/30 rounded-lg w-96 p-4'>
+        <div className='mb-2'>
+            <h2 className='text-lightAccent'>User Settings</h2>
+            <p className='text-darkAccent text-xs'>Make changes to your profile here</p>
+        </div>
         {error && <p className="text-red-500">{error}</p>}
-        <div className="mb-4">
-          <label className="block text-gray-700">Avatar</label>
-          <button
-            onClick={handleButtonClick}
-            className="mt-2 p-2 bg-blue-500 text-white rounded"
-          >
-            Upload Avatar
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleAvatarUpload}
-          />
-          {avatarUploadError && (
-            <p className="text-red-500 mt-2">{avatarUploadError}</p>
-          )}
+        <div className='flex flex-col gap-y-6'>
+            <div className='flex justify-center items-center space-x-4 mt-1'>
+                <Label htmlFor='email' className='text-lightAccent text-xs tracking-wide'>Email</Label>
+                <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full text-lightAccent border border-darkAccent/30 rounded"
+                />
+                <Button variant="outline" onClick={handleEmailChange} className='text-xs text-lightAccent tracking-wider px-2 transition duration-300 ease-in'>Update</Button>
+            </div>
+            <div>
+                <Label htmlFor='profile-picture' className='text-lightAccent text-xs tracking-wide'>Profile Picture</Label>
+                <div className='flex items-center space-x-4 mt-1'>
+                    <Button variant="outline" onClick={handleButtonClick} className='text-xs text-lightAccent px-2 transition duration-300 ease-in'>Upload File</Button>
+                    <Input
+                        id="profile-picture"
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleAvatarUpload}
+                        className='text-lightAccent' 
+                    />
+                </div>
+                {avatarUploadError && (
+                    <p className="text-red-500 mt-2">{avatarUploadError}</p>
+                )}
+            </div>
+            <div>
+                <Label htmlFor='profile-color' className='text-lightAccent text-xs tracking-wide'>Profile Color</Label>
+                <div className='flex items-center space-x-4 mt-1'>
+                    <Input 
+                        id="profile-color"
+                        type="color"
+                        value={selectedColor}
+                        onChange={(e) => setSelectedColor(e.target.value)}
+                        className='w-[100px] p-0 text-lightAccent border border-darkAccent/30 rounded'
+                    />
+                    <Button variant="outline" onClick={handleConfirmColor} className='text-xs text-lightAccent tracking-wider px-2 transition duration-300 ease-in'>Confirm Color</Button>
+                </div>
+            </div>
+            <div className='flex justify-between items-center my-8'>
+                <Button variant="outline" onClick={handleDisconnectGitHub} className='text-xs text-lightAccent tracking-wider px-2 transition duration-300 ease-in'>Disconnect GitHub</Button>
+                <Button variant="outline" onClick={handleSignOut} className='text-xs text-lightAccent tracking-wider px-2 transition duration-300 ease-in'>Sign Out</Button>
+            </div>
+            <div className='flex justify-end items-center'>
+                <Button variant="outline" onClick={onClose} className='text-xs text-lightAccent border-primDark tracking-wider px-2 transition duration-300 ease-in'>Close</Button>
+            </div>
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mt-4">
-            Choose Chat Color
-          </label>
-          <input
-            type="color"
-            value={selectedColor}
-            onChange={(e) => setSelectedColor(e.target.value)}
-            className="mt-2"
-          />
-          <button
-            onClick={handleConfirmColor}
-            className="mt-2 p-2 bg-blue-500 text-white rounded"
-          >
-            Confirm Color
-          </button>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded mt-1"
-          />
-          <button
-            onClick={handleEmailChange}
-            className="mt-2 p-2 bg-green-500 text-white rounded"
-          >
-            Update Email
-          </button>
-        </div>
-        <div className="mb-4">
-          <button
-            onClick={handleDisconnectGitHub}
-            className="p-2 bg-red-500 text-white rounded"
-          >
-            Disconnect from GitHub
-          </button>
-        </div>
-        <div className="flex justify-end">
-          <button onClick={onClose} className="p-2 bg-gray-300 rounded">
-            Close
-          </button>
-        </div>
-      </div>
+    </div>
     </div>
   );
 };
+
+
+
+
+

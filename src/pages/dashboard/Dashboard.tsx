@@ -38,15 +38,34 @@ const Dashboard = () => {
       return;
     }
 
-    const { data, error } = await supabase
-      .from('user_projects')
-      .select('id, name, description, github_repo_url')
+    // Fetch project memberships for the current user
+    const { data: memberships, error: membershipsError } = await supabase
+      .from('project_memberships')
+      .select('project_id')
+      .eq('user_id', user.id);
 
-    if (error) {
-      console.error('Error fetching projects:', error);
-      alert(`Error fetching projects: ${error.message}`);
+    if (membershipsError) {
+      console.error('Error fetching memberships:', membershipsError);
+      alert(`Error fetching memberships: ${membershipsError.message}`);
+      return;
+    }
+
+    if (memberships && memberships.length > 0) {
+      const projectIds = memberships.map((membership) => membership.project_id);
+
+      const { data: projectsData, error: projectsError } = await supabase
+        .from('projects')
+        .select('id, name, description, github_repo_url')
+        .in('id', projectIds); 
+
+      if (projectsError) {
+        console.error('Error fetching projects:', projectsError);
+        alert(`Error fetching projects: ${projectsError.message}`);
+      } else {
+        setProjects(projectsData);
+      }
     } else {
-      setProjects(data);
+      setProjects([]);
     }
   };
 
@@ -89,7 +108,7 @@ const Dashboard = () => {
           New Project
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-2">
         {projects.map((project) => (
           <ProjectCard key={project.id} project={project} onDelete={handleProjectDeleted} />
         ))}

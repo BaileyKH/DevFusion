@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext, useRef } from 'react';
-import { FixedSizeList as List } from 'react-window';
 import { supabase } from '../supabaseDB';
 import { UserContext } from '../App';
 import { useParams } from 'react-router-dom';
@@ -15,7 +14,7 @@ interface ChatMessage {
   user: {
     username: string;
     avatar_url?: string;
-    display_color?: string; // Added display_color property
+    display_color?: string;
   };
 }
 
@@ -24,10 +23,9 @@ export const Chat = () => {
   const user = useContext(UserContext);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const messagesListRef = useRef<any>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesListRef = useRef<HTMLDivElement>(null);
 
   const normalizeMessageData = (message: any): ChatMessage => {
     if (Array.isArray(message.user)) {
@@ -36,8 +34,8 @@ export const Chat = () => {
     return message as ChatMessage;
   };
 
-  const fetchMessages = async (cursor?: string) => {
-    let query = supabase
+  const fetchMessages = async () => {
+    const { data, error } = await supabase
       .from('chat_messages')
       .select(`
         id,
@@ -51,47 +49,28 @@ export const Chat = () => {
         )
       `)
       .eq('project_id', projectId)
-      .order('created_at', { ascending: false })
-      .limit(20);
-
-    if (cursor) {
-      query = query.lt('created_at', cursor);
-    }
-
-    const { data, error } = await query;
+      .order('created_at', { ascending: true });
 
     if (error) {
       console.error('Error fetching messages:', error);
     } else if (data) {
-      const adjustedData = data.map(normalizeMessageData);
-
-      if (cursor) {
-        setMessages((prevMessages) => [...adjustedData.reverse(), ...prevMessages]);
-      } else {
-        setMessages(adjustedData.reverse());
-        setIsAtBottom(true);
-      }
-
-      if (data.length < 20) {
-        setHasMore(false);
-      }
+      setMessages(data.map(normalizeMessageData));
+      setIsAtBottom(true);
     }
   };
 
-  const loadMoreMessages = async () => {
-    if (loadingMore) return;
+  const handleScroll = () => {
+    if (!messagesListRef.current) return;
 
-    setLoadingMore(true);
+    const { scrollTop, scrollHeight, clientHeight } = messagesListRef.current;
 
-    const oldestMessage = messages[0];
-    const cursor = oldestMessage.created_at;
-    await fetchMessages(cursor);
-    setLoadingMore(false);
+    const atBottom = Math.abs(scrollHeight - scrollTop - clientHeight) <= 50;
+    setIsAtBottom(atBottom);
   };
 
   const scrollToBottom = () => {
-    if (messagesListRef.current) {
-      messagesListRef.current.scrollToItem(messages.length - 1, 'end');
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -137,39 +116,8 @@ export const Chat = () => {
       )
       .subscribe();
 
-    // Real-time subscription for changes in user profiles (avatar or display color)
-    const userChannel = supabase
-      .channel('public:users')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'users',
-        },
-        async (payload) => {
-          const updatedUser = payload.new;
-          setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-              msg.user_id === updatedUser.id
-                ? {
-                    ...msg,
-                    user: {
-                      ...msg.user,
-                      avatar_url: updatedUser.avatar_url,
-                      display_color: updatedUser.display_color,
-                    },
-                  }
-                : msg
-            )
-          );
-        }
-      )
-      .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
-      supabase.removeChannel(userChannel);
     };
   }, [projectId]);
 
@@ -179,6 +127,7 @@ export const Chat = () => {
     }
   }, [messages]);
 
+  // Code detection function
   const isProbablyCode = (text: string): boolean => {
     const hasMultipleLines = text.trim().includes('\n');
     const codeIndicators = ['{', '}', '=>', ';', 'function', 'const', 'let', 'var', 'class', 'import', '#include', 'def', 'if', 'else'];
@@ -186,9 +135,7 @@ export const Chat = () => {
     return hasMultipleLines && containsCodeIndicators;
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSendMessage = async () => {
     if (newMessage.trim() === '') return;
 
     const content = isProbablyCode(newMessage) ? `\`\`\`\n${newMessage.trim()}\n\`\`\`` : newMessage.trim();
@@ -207,109 +154,116 @@ export const Chat = () => {
     }
   };
 
-  const codeBlockRegex = /```([\s\S]*?)```/g;
-
-  const Row = ({ index, style }: { index: number; style: any }) => {
-    const message = messages[index];
-    const messageUser = message.user;
-    const hasCodeBlock = codeBlockRegex.test(message.content);
-
-    return (
-      <div
-        key={message.id}
-        className={`message ${message.user_id === user.id ? 'sent' : 'received'} my-4`}
-        style={style}
-      >
-        <div className="flex items-center gap-x-4">
-          <div>
-            {messageUser.avatar_url && (
-              <img
-                src={messageUser.avatar_url}
-                alt="Avatar"
-                className="h-9 w-9 rounded-full"
-              />
-            )}
-          </div>
-          <div>
-            <div className='flex gap-x-4 items-center'>
-              <p
-                className="font-bold text-sm"
-                style={{ color: messageUser.display_color ?? '#FFF' }}
-              >
-                {messageUser.username}
-              </p>
-              <small className='text-white/50'>
-                {new Date(message.created_at).toLocaleTimeString([], {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                  hour12: true,
-                })}
-              </small>
-            </div>
-            <div className='mt-1'>
-              {hasCodeBlock ? (
-                (() => {
-                  codeBlockRegex.lastIndex = 0;
-                  const parts = message.content.split(codeBlockRegex);
-                  return parts.map((part, index) => {
-                    if (index % 2 === 1) {
-                      return (
-                        <SyntaxHighlighter
-                          key={index}
-                          language=""
-                          style={atelierCaveDark}
-                          showLineNumbers
-                          className="rounded-md"
-                        >
-                          {part}
-                        </SyntaxHighlighter>
-                      );
-                    } else {
-                      return part ? <p key={index}>{part}</p> : null;
-                    }
-                  });
-                })()
-              ) : (
-                <p className='text-sm'>{message.content}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // Handle key press in the textarea
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
+  // Regular expression to detect code blocks
+  const codeBlockRegex = /```([\s\S]*?)```/g;
+
   return (
-    <div className="w-full h-full">
-      <List
-        height={600}
-        itemCount={messages.length}
-        itemSize={100}
-        width="100%"
+    <div className="w-full h-screen flex flex-col">
+      <div
+        className="flex-grow overflow-y-auto p-4 space-y-4"
         ref={messagesListRef}
-        onItemsRendered={({ visibleStopIndex }) => {
-          if (visibleStopIndex === messages.length - 1) {
-            setIsAtBottom(true);
-          }
-        }}
+        onScroll={handleScroll}
       >
-        {Row}
-      </List>
-      <form onSubmit={handleSendMessage} className="border-t-2 border-primDark flex items-center py-4">
-        <textarea
-          placeholder="Type your message..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          className="w-full h-12 mt-2 p-2 bg-transparent border border-primDark rounded-md mr-4 placeholder:text-xs placeholder:text-darkAccent resize-none"
-        />
-        <button type="submit" className="mt-2 p-2 bg-primAccent hover:bg-red-950 transition duration-300 text-lightAccent rounded-md">
-          Send
-        </button>
-      </form>
+        {messages.map((message) => {
+          const messageUser = Array.isArray(message.user) ? message.user[0] : message.user;
+          const hasCodeBlock = codeBlockRegex.test(message.content);
+          const userColor = messageUser.display_color || '#FFFFFF';
+
+          return (
+            <div
+              key={message.id}
+              className="my-8"
+              style={{
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+              }}
+            >
+              <div className="flex gap-x-4 items-start">
+                {messageUser.avatar_url ? (
+                  <img
+                    src={messageUser.avatar_url}
+                    alt="Avatar"
+                    className="h-10 w-10 rounded-full"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-lg">
+                    {messageUser.username[0].toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <div className="flex items-center gap-x-4">
+                    <p className="font-bold" style={{ color: userColor }}>
+                      {messageUser.username}
+                    </p>
+                    <small>
+                      {new Date(message.created_at).toLocaleTimeString([], {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true,
+                      })}
+                    </small>
+                  </div>
+                  <div
+                    style={{
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                    }}
+                  >
+                    {hasCodeBlock ? (
+                      (() => {
+                        codeBlockRegex.lastIndex = 0;
+                        const parts = message.content.split(codeBlockRegex);
+                        return parts.map((part, index) => {
+                          if (index % 2 === 1) {
+                            return (
+                              <SyntaxHighlighter
+                                key={index}
+                                language=""
+                                style={atelierCaveDark}
+                                showLineNumbers
+                                className="rounded-md mt-2"
+                              >
+                                {part}
+                              </SyntaxHighlighter>
+                            );
+                          } else {
+                            return part ? <p key={index}>{part}</p> : null;
+                          }
+                        });
+                      })()
+                    ) : (
+                      <p>{message.content}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="flex-none">
+        <form onSubmit={(e) => e.preventDefault()} className="border-t-2 border-darkAccent/65 flex items-center p-4">
+          <textarea
+            placeholder="Type your message..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
+            className="flex-grow h-12 p-2 bg-transparent border border-darkAccent/65 rounded-md mr-4 placeholder:text-xs placeholder:text-darkAccent resize-none"
+          />
+        </form>
+      </div>
     </div>
   );
 };
 
 export default Chat;
-
-

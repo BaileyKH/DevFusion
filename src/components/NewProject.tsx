@@ -3,6 +3,26 @@ import { supabase } from '../supabaseDB';
 import { UserContext } from '../App';
 import axios from 'axios';
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from '@/components/ui/button';
+
 interface NewProjectProps {
   isOpen: boolean;
   onClose: () => void;
@@ -97,73 +117,74 @@ export const NewProject: React.FC<NewProjectProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Create New Project</h2>
-        <form onSubmit={handleCreateProject}>
-          <div className="mb-4">
-            <label className="block text-gray-700">Project Name</label>
-            <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded mt-1"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Description</label>
-            <textarea
-              className="w-full p-2 border border-gray-300 rounded mt-1"
-              value={projectDescription}
-              onChange={(e) => setProjectDescription(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-4 flex items-center">
-            <input
-              type="checkbox"
-              checked={connectToGitHub}
-              onChange={(e) => setConnectToGitHub(e.target.checked)}
-              className="mr-2"
-            />
-            <label className="text-gray-700">Connect to GitHub</label>
-          </div>
-          {connectToGitHub && repos.length > 0 && (
-            <div className="mb-4">
-              <label className="block text-gray-700">Select Repository</label>
-              <select
-                value={selectedRepo}
-                onChange={(e) => setSelectedRepo(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded mt-1"
-              >
-                <option value="">Select a repository</option>
-                {repos.map((repo) => (
-                  <option key={repo.id} value={`${repo.owner.login}/${repo.name}`}>
-                    {repo.full_name}
-                  </option>
-                ))}
-              </select>
+      <Card className="w-[350px] border-darkAccent/30">
+        <CardHeader>
+          <CardTitle>Create project</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreateProject}>
+            <div className="grid w-full items-center gap-4">
+              <div className="flex flex-col space-y-1.5">
+                <Label>Project Name</Label>
+                <Input
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  className='border-darkAccent/30'
+                />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label>Description</Label>
+                <Input
+                  value={projectDescription}
+                  onChange={(e) => setProjectDescription(e.target.value)}
+                  className='border-darkAccent/30'
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="connectToGitHub"
+                  checked={connectToGitHub}
+                  onCheckedChange={(checked) => setConnectToGitHub(checked === true)}
+                />
+                <Label htmlFor="connectToGitHub">
+                  Connect GitHub Repo
+                </Label>
+              </div>
+              {connectToGitHub && repos.length > 0 && (
+                <div className="flex flex-col space-y-1.5">
+                  <Label>Select Repository</Label>
+                  <Select
+                    value={selectedRepo}
+                    onValueChange={(value) => setSelectedRepo(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Repo" />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                      {repos.map((repo) => (
+                        <SelectItem
+                          key={repo.id}
+                          value={`${repo.owner.login}/${repo.name}`}
+                        >
+                          {repo.full_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
-          )}
-          <div className="flex justify-end space-x-2">
-            <button
-              type="button"
-              className="p-2 bg-gray-300 rounded"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="p-2 bg-blue-500 text-white rounded"
-              disabled={loading}
-            >
-              {loading ? 'Creating...' : 'Create'}
-            </button>
-          </div>
-        </form>
-      </div>
+            <CardFooter className="flex justify-between mt-4">
+              <Button variant="outline" onClick={onClose} className='transition duration-300 ease-in'>
+                Cancel
+              </Button>
+              <Button type="submit" className='transition duration-300 ease-in'>
+                {loading ? 'Creating...' : 'Create'}
+              </Button>
+            </CardFooter>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

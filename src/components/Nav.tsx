@@ -1,6 +1,5 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseDB";
 import { UserContext } from "../App";
 import { IconUserCircle } from '@tabler/icons-react';
 import { ProfileModal } from "./ProfileModal";
@@ -9,13 +8,6 @@ export const Nav = () => {
   const user = useContext(UserContext);
   const navigate = useNavigate();
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-
-  const handleSignOut = async () => {
-    if (user) {
-      await supabase.auth.signOut();
-      navigate('/auth');
-    }
-  };
 
   return (
     <>
@@ -27,25 +19,25 @@ export const Nav = () => {
           {user ? (
             <>
               {user.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt="User Avatar"
-                  className="h-10 w-10 rounded-full cursor-pointer border border-darkAccent"
-                  onClick={() => setIsUserModalOpen(true)}
-                />
+                <div className="flex items-center gap-x-8">
+                  <Link to='/dashboard' className="tracking-wider hover:text-primAccent hover:underline underline-offset-4 transition duration-200 ease-in">Dashboard</Link>
+                  <img
+                    src={user.avatar_url}
+                    alt="User Avatar"
+                    className="h-10 w-10 rounded-full cursor-pointer border border-darkAccent"
+                    onClick={() => setIsUserModalOpen(true)}
+                  />
+                </div>
               ) : (
-                <IconUserCircle
-                  size={28}
-                  className="text-white cursor-pointer"
-                  onClick={() => setIsUserModalOpen(true)}
-                />
+                <div className="flex items-center gap-x-8">
+                  <Link to='/dashboard'>Dashboard</Link>
+                  <IconUserCircle
+                    size={28}
+                    className="text-white cursor-pointer"
+                    onClick={() => setIsUserModalOpen(true)}
+                  />
+                </div>
               )}
-              <button
-                onClick={handleSignOut}
-                className="bg-primAccent hover:bg-red-950 px-3 py-1 rounded-md transition duration-300"
-              >
-                Sign Out
-              </button>
             </>
           ) : (
             <button

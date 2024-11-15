@@ -36,7 +36,7 @@ export const NewContribs = () => {
   }
 
   return (
-    <div>
+    <div className='my-4'>
       <h1>{project.name}</h1>
       {user && user.id === project.owner_id && <AddContribs projectId={projectId} />}
     </div>
