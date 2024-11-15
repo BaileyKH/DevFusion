@@ -2,6 +2,16 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseDB';
 import { memo } from 'react';
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import ShineBorder from "@/components/ui/shine-border";
+
 interface ProjectCardProps {
   project: any;
   onDelete: (projectId: string) => void;
@@ -42,24 +52,37 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
 
   return (
     <div
-      className="m-8 border border-darkAccent p-4 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transform transition duration-300 cursor-pointer relative bg-radial-bg h-48"
+      className="hover:scale-105 transform transition duration-300 cursor-pointer relative"
       onClick={handleClick}
     >
-      <h2 className="text-xl font-semibold text-white">{project.name}</h2>
-      <p className="text-sm font-light text-lightAccent">{project.description}</p>
-      {project.github_repo_url && (
-        <p className="text-lightAccent mt-16">
-          <strong className='text-white'>Repo:</strong> {project.github_repo_url}
-        </p>
-      )}
-      <button
-        onClick={handleDelete}
-        className="absolute top-4 right-4 bg-primAccent text-white px-2 py-1 rounded-full transition duration-300 hover:bg-red-950"
-      >
-        Delete
-      </button>
+      <ShineBorder borderWidth={1} color={'#931621'}>
+        <Card className='w-[350px] h-[250px] border-none'>
+          <CardHeader>
+            <CardTitle>{project.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className='text-lightAccent/70'>{project.description}</p>
+          </CardContent>
+          <CardFooter>
+            {project.github_repo_url && (
+              <p className="text-lightAccent/70 mt-16">
+                <strong className='text-lightAccent'>Repo:</strong> {project.github_repo_url}
+              </p>
+            )}
+            {/* <button
+              onClick={handleDelete}
+              className="absolute top-4 right-4 bg-primAccent text-white px-2 py-1 rounded-full transition duration-300 hover:bg-red-950"
+            >
+              Delete
+            </button> */}
+          </CardFooter>
+        </Card>
+      </ShineBorder>
     </div>
   );
 };
 
 export const ProjectCard = memo(ProjectCardComponent);
+
+
+
