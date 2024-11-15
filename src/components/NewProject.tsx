@@ -117,7 +117,7 @@ export const NewProject: React.FC<NewProjectProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <Card className="w-[350px]">
+      <Card className="w-[350px] border-darkAccent/30">
         <CardHeader>
           <CardTitle>Create project</CardTitle>
         </CardHeader>
@@ -129,6 +129,7 @@ export const NewProject: React.FC<NewProjectProps> = ({
                 <Input
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
+                  className='border-darkAccent/30'
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
@@ -136,6 +137,7 @@ export const NewProject: React.FC<NewProjectProps> = ({
                 <Input
                   value={projectDescription}
                   onChange={(e) => setProjectDescription(e.target.value)}
+                  className='border-darkAccent/30'
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -173,10 +175,10 @@ export const NewProject: React.FC<NewProjectProps> = ({
               )}
             </div>
             <CardFooter className="flex justify-between mt-4">
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="outline" onClick={onClose} className='transition duration-300 ease-in'>
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" className='transition duration-300 ease-in'>
                 {loading ? 'Creating...' : 'Create'}
               </Button>
             </CardFooter>
