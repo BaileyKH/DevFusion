@@ -37,7 +37,7 @@ export const Home= () => {
                   </BoxReveal>
               
                   <BoxReveal boxColor={"#931621"} duration={0.5}>
-                    <Button className="mt-12 bg-primAccent text-lg">Get Started</Button>
+                    <Button className="mt-12 bg-primAccent py-6 text-lg tracking-wide">Get Started</Button>
                   </BoxReveal>
               </div>
           </div>
