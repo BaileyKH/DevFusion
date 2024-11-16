@@ -194,7 +194,7 @@ export const Chat = () => {
                     className="h-10 w-10 rounded-full"
                   />
                 ) : (
-                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-lg">
+                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-lg text-primAccent">
                     {messageUser.username[0].toUpperCase()}
                   </div>
                 )}

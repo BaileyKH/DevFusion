@@ -1,7 +1,6 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../App";
-import { IconUserCircle } from '@tabler/icons-react';
 import { ProfileModal } from "./ProfileModal";
 
 export const Nav = () => {
@@ -31,11 +30,9 @@ export const Nav = () => {
               ) : (
                 <div className="flex items-center gap-x-8">
                   <Link to='/dashboard'>Dashboard</Link>
-                  <IconUserCircle
-                    size={28}
-                    className="text-white cursor-pointer"
-                    onClick={() => setIsUserModalOpen(true)}
-                  />
+                  <div onClick={() => setIsUserModalOpen(true)} className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-lg text-primAccent">
+                      {user.username[0].toUpperCase()}
+                  </div>
                 </div>
               )}
             </>

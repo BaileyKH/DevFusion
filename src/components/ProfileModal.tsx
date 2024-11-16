@@ -13,7 +13,6 @@ interface ProfileModalProps {
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const user = useContext(UserContext);
-  const [displayColor, setDisplayColor] = useState<string>('#FFFFFF');
   const [email, setEmail] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>('');
@@ -23,7 +22,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
   // Sync initial state with user data when modal is open or user data changes
   useEffect(() => {
     if (user) {
-      setDisplayColor(user.display_color || '#FFFFFF');
       setSelectedColor(user.chat_color || '#FFFFFF');
       setEmail(user.email || '');
     }

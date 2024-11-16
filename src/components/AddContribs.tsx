@@ -2,7 +2,7 @@ import { useState, useContext } from 'react';
 import { supabase } from '../supabaseDB';
 import { UserContext } from '../App';
 
-import { IconPlus, IconUserCircle } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 
 import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button';
@@ -106,7 +106,9 @@ interface AddContributorProps {
                       {result.avatar_url ? (
                         <img src={result.avatar_url} className="h-10 w-10 rounded-full"/>
                       ) : (
-                        <IconUserCircle stroke={1} className="h-10 w-10 rounded-full"/>
+                        <div className="h-10 w-10 rounded-full bg-gray-300 text-lg text-primAccent">
+                          {user.username[0].toUpperCase()}
+                        </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
