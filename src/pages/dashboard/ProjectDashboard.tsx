@@ -1,17 +1,108 @@
-import { useState, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../App';
 import { ProfileModal } from '../../components/ProfileModal';
 import { Outlet, NavLink, useParams } from 'react-router-dom';
-import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
-import './projectdash.css'
+import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react';
+import { supabase } from '../../supabaseDB';
+import './projectdash.css';
 
-import { IconX, IconMenu2, IconCaretLeft, IconBrandGithub, IconCheckbox, IconMessageDots, IconSquarePlus, IconUserCircle } from '@tabler/icons-react';
+import {
+  IconX,
+  IconMenu2,
+  IconCaretLeft,
+  IconBrandGithub,
+  IconCheckbox,
+  IconMessageDots,
+  IconSquarePlus,
+  IconTrash,
+  IconUsers
+} from '@tabler/icons-react';
 
 const ProjectDashboard = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [members, setMembers] = useState<any[]>([]);
+  const [projectOwnerId, setProjectOwnerId] = useState<string | null>(null);
   const user = useContext(UserContext);
+
+  // Fetch project members
+  useEffect(() => {
+    const fetchProjectMembers = async () => {
+      try {
+        // Fetch project owner
+        const { data: projectData, error: projectError } = await supabase
+          .from('projects')
+          .select('owner_id')
+          .eq('id', projectId)
+          .single();
+
+        if (projectError) {
+          console.error('Error fetching project owner:', projectError);
+          return;
+        }
+
+        if (projectData) {
+          setProjectOwnerId(projectData.owner_id);
+        }
+
+        // Fetch project members
+        const { data: membersData, error: membersError } = await supabase
+          .from('project_memberships')
+          .select(`
+            user_id,
+            users: user_id (
+              username,
+              avatar_url
+            )
+          `)
+          .eq('project_id', projectId);
+
+        if (membersError) {
+          console.error('Error fetching project members:', membersError);
+          return;
+        }
+
+        if (membersData) {
+          setMembers(membersData);
+        }
+      } catch (error) {
+        console.error('Unexpected error fetching project members:', error);
+      }
+    };
+
+    fetchProjectMembers();
+  }, [projectId]);
+
+  // Handles removing a member
+  const handleRemoveMember = async (memberId: string) => {
+    if (!user || user.id !== projectOwnerId) {
+      alert('You do not have permission to remove members.');
+      return;
+    }
+
+    const confirmRemove = window.confirm('Are you sure you want to remove this member?');
+    if (!confirmRemove) return;
+
+    try {
+      const { error } = await supabase
+        .from('project_memberships')
+        .delete()
+        .eq('user_id', memberId)
+        .eq('project_id', projectId);
+
+      if (error) {
+        console.error('Error removing member:', error);
+        alert('Error removing member. Please try again.');
+      } else {
+        setMembers((prevMembers) => prevMembers.filter((member) => member.user_id !== memberId));
+        alert('Member removed successfully.');
+      }
+    } catch (error) {
+      console.error('Unexpected error removing member:', error);
+      alert('An unexpected error occurred. Please try again.');
+    }
+  };
 
   return (
     <div className='h-full'>
@@ -46,7 +137,45 @@ const ProjectDashboard = () => {
                   <li><NavLink to={`/projects/${projectId}`} end><div className='project-nav-ico'><IconMessageDots stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Chat</div></NavLink></li>
                   <li><NavLink to={`/projects/${projectId}/tasks`}><div className='project-nav-ico'><IconCheckbox stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Tasks</div></NavLink></li>
                   <li><NavLink to={`/projects/${projectId}/changelog`}><div className='project-nav-ico'><IconBrandGithub stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Change Logs</div></NavLink></li>
-                  <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-red-950 border-none p-2 w-max rounded-md mt-16 transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
+                  <div>
+                    <div className="h-full overflow-hidden px-4 sm:px-6 lg:px-8">
+                      <div className='flex'>
+                        <IconUsers stroke={2} className="h-6 w-6 shrink-0 mr-2"/>
+                        <h3 className="text-sm font-semibold tracking-wider">Project Members</h3>
+                      </div>
+                      <ul className="space-y-4">
+                        {members.map((member) => (
+                          <li key={member.user_id} className="flex items-center gap-x-4">
+                            {member.users.avatar_url ? (
+                              <img
+                                src={member.users.avatar_url}
+                                alt="Avatar"
+                                className="h-8 w-8 rounded-full"
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-lg">
+                                {member.users.username[0].toUpperCase()}
+                              </div>
+                            )}
+                            <span className="font-medium">{member.users.username}</span>
+                            {user?.id === projectOwnerId && member.user_id !== projectOwnerId && (
+                              <button
+                                onClick={() => handleRemoveMember(member.user_id)}
+                                className="ml-auto p-2 bg-red-500 text-white rounded hover:bg-red-700 transition duration-300"
+                              >
+                                <IconTrash size={18} />
+                              </button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      {user?.id === projectOwnerId && (
+                        <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-red-950 border-none p-2 w-max rounded-md transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
+                      )}
+                    </div>
+                  </div>
                   </ul>
                 </li>
               </ul>
@@ -69,7 +198,45 @@ const ProjectDashboard = () => {
                   <li><NavLink to={`/projects/${projectId}`} end><div className='project-nav-ico'><IconMessageDots stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Chat</div></NavLink></li>
                   <li><NavLink to={`/projects/${projectId}/tasks`}><div className='project-nav-ico'><IconCheckbox stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Tasks</div></NavLink></li>
                   <li><NavLink to={`/projects/${projectId}/changelog`}><div className='project-nav-ico'><IconBrandGithub stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Change Logs</div></NavLink></li>
-                  <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-red-950 border-none p-2 w-max rounded-md mt-16 transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
+                  <div>
+                    <div className="h-full overflow-hidden mt-16 mb-12">
+                      <div className='flex items-center mb-4 nav-gradient pb-2'>
+                        <IconUsers stroke={2} className="h-6 w-6 shrink-0 mr-2"/>
+                        <h3 className="text-sm font-semibold tracking-wider">Project Members</h3>
+                      </div>
+                      <ul className="space-y-4">
+                        {members.map((member) => (
+                          <li key={member.user_id} className="flex items-center gap-x-4">
+                            {member.users.avatar_url ? (
+                              <img
+                                src={member.users.avatar_url}
+                                alt="Avatar"
+                                className="h-6 w-6 rounded-full"
+                              />
+                            ) : (
+                              <div className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center text-lg text-primAccent">
+                                {member.users.username[0].toUpperCase()}
+                              </div>
+                            )}
+                            <p className="font-medium text-lightAccent text-sm">{member.users.username}</p>
+                            {user?.id === projectOwnerId && member.user_id !== projectOwnerId && (
+                              <button
+                                onClick={() => handleRemoveMember(member.user_id)}
+                                className="ml-auto p-2 text-primAccent hover:text-red-950 transition duration-200"
+                              >
+                                <IconTrash size={18} />
+                              </button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      {user?.id === projectOwnerId && (
+                        <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-red-950 border-none p-2 w-max rounded-md transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
+                      )}
+                    </div>
+                  </div>
               </ul>
             </li>
             <li className="-mx-6 mt-auto">
@@ -82,11 +249,9 @@ const ProjectDashboard = () => {
                       onClick={() => setIsUserModalOpen(true)}
                     />
                   ) : (
-                    <IconUserCircle
-                      size={28}
-                      className="text-lightAccent cursor-pointer"
-                      onClick={() => setIsUserModalOpen(true)}
-                    />
+                    <div onClick={() => setIsUserModalOpen(true)} className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-lg text-primAccent">
+                      {user.username[0].toUpperCase()}
+                    </div>
                 )}
                   <span className="sr-only">Your profile</span>
                   <span aria-hidden="true" className='text-lightAccent'>{user.username}</span>
