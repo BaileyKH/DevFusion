@@ -13,7 +13,7 @@ export default {
   		colors: {
   			primDark: '#000000',
   			secDark: '#080808',
-  			primAccent: '#931621',
+  			primAccent: '#0398fc',
   			lightAccent: '#FFFFFF',
   			darkAccent: '#b3b3b3'
   		},
