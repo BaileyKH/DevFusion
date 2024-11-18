@@ -1,3 +1,4 @@
+// dashboard.tsx
 import { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../App';
 import { supabase } from '../../supabaseDB';
@@ -7,30 +8,7 @@ import { ProjectCard } from '../../components/ProjectCard';
 const Dashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const user = useContext(UserContext);
-  const [isGitHubConnected, setIsGitHubConnected] = useState(false);
-
-  useEffect(() => {
-    const githubToken = localStorage.getItem('github_token');
-    if (githubToken) {
-      fetch('https://api.github.com/user', {
-        headers: {
-          Authorization: `token ${githubToken}`,
-        },
-      })
-        .then(response => {
-          if (response.ok) {
-            setIsGitHubConnected(true);
-          } else {
-            console.warn('GitHub token is expired or invalid.');
-            setIsGitHubConnected(false);
-          }
-        })
-        .catch(() => setIsGitHubConnected(false));
-    } else {
-      setIsGitHubConnected(false);
-    }
-  }, []);
+  const { user } = useContext(UserContext);
 
   const fetchProjects = async () => {
     if (!user) {
@@ -91,18 +69,8 @@ const Dashboard = () => {
     <div className="p-4">
       <div className='flex justify-between items-center'>
         <h1 className="text-2xl font-bold mb-4 text-lightAccent">Your Projects</h1>
-        {!isGitHubConnected && (
-          <button
-            className="mb-4 p-2 bg-green-500 text-white rounded"
-            onClick={() =>
-              window.location.href = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&scope=repo`
-            }
-          >
-            Connect to GitHub
-          </button>
-        )}
         <button
-          className="mb-4 p-2 bg-primAccent hover:bg-red-950 transition duration-300 text-lightAccent rounded"
+          className="mb-4 p-2 bg-primAccent hover:bg-blue-800 transition duration-300 text-lightAccent rounded"
           onClick={() => setIsModalOpen(true)}
         >
           New Project
