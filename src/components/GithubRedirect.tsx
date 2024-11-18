@@ -1,23 +1,70 @@
-import { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+// GithubRedirect.tsx
+import { useEffect, useContext, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseDB';
+import { UserContext } from '../App';
 
 export const GithubRedirect = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const { user, setUser } = useContext(UserContext);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('github_token', token);
-      console.log('GitHub Access Token:', token);
-    } else {
-      console.error('No token found in URL parameters.');
-    }
-  }, [token]);
+    const saveGitHubToken = async () => {
+      if (!user) {
+        return;
+      }
 
-  return (
-    <div>
-      <h1>GitHub Authorization Successful</h1>
-      <p>You have successfully connected to GitHub!</p>
-    </div>
-  );
+      if (token) {
+        try {
+          const { error } = await supabase
+            .from('users')
+            .update({ github_token: token })
+            .eq('id', user.id);
+
+          if (error) {
+            console.error('Error saving GitHub token:', error);
+          } else {
+            console.log('GitHub token saved successfully.');
+
+            // Fetch updated user data
+            const { data: updatedUser, error: fetchError } = await supabase
+              .from('users')
+              .select('username, email, avatar_url, display_color, github_token')
+              .eq('id', user.id)
+              .single();
+
+            if (fetchError) {
+              console.error('Error fetching updated user data:', fetchError);
+            } else {
+              setUser({ ...user, ...updatedUser });
+              navigate('/dashboard');
+            }
+          }
+        } catch (error) {
+          console.error('Unexpected error during GitHub token saving:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        console.error('No token found in URL parameters.');
+        setLoading(false);
+      }
+    };
+
+    saveGitHubToken();
+  }, [token, user, navigate, setUser]);
+
+  if (loading) {
+    return (
+      <div>
+        <h1>GitHub Authorization</h1>
+        <p>Connecting to GitHub...</p>
+      </div>
+    );
+  }
+
+  return null;
 };
