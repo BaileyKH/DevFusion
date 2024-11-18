@@ -2,15 +2,15 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseDB';
 import { memo } from 'react';
 
+import { IconTrash } from '@tabler/icons-react';
+
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import ShineBorder from "@/components/ui/shine-border";
 
 interface ProjectCardProps {
   project: any;
@@ -25,7 +25,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent click event from navigating to the project
+    e.stopPropagation(); 
     const confirmDelete = window.confirm(
       `Are you sure you want to delete the project "${project.name}"? This action cannot be undone.`
     );
@@ -52,13 +52,13 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
 
   return (
     <div
-      className="hover:scale-105 transform transition duration-300 cursor-pointer relative"
+      className="hover:scale-105 transform transition duration-300 cursor-pointer relative w-full"
       onClick={handleClick}
     >
-      <ShineBorder borderWidth={1} color={'#931621'}>
-        <Card className='w-[350px] h-[250px] border-none'>
+      <div className='border border-darkAccent/65 hover:border-primAccent/65 rounded-lg w-full'>
+        <Card className='w-full h-[250px] border-none'>
           <CardHeader>
-            <CardTitle>{project.name}</CardTitle>
+            <CardTitle className='text-primAccent'>{project.name}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className='text-lightAccent/70'>{project.description}</p>
@@ -69,15 +69,14 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
                 <strong className='text-lightAccent'>Repo:</strong> {project.github_repo_url}
               </p>
             )}
-            {/* <button
+            <IconTrash
+              stroke={1}
               onClick={handleDelete}
-              className="absolute top-4 right-4 bg-primAccent text-white px-2 py-1 rounded-full transition duration-300 hover:bg-red-950"
-            >
-              Delete
-            </button> */}
+              className="absolute bottom-4 right-4 text-primAccent h-6 w-6 transition duration-300 hover:text-red-500"
+            />
           </CardFooter>
         </Card>
-      </ShineBorder>
+      </div>
     </div>
   );
 };
