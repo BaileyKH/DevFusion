@@ -24,7 +24,7 @@ const ProjectDashboard = () => {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [members, setMembers] = useState<any[]>([]);
   const [projectOwnerId, setProjectOwnerId] = useState<string | null>(null);
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   // Fetch project members
   useEffect(() => {
@@ -125,7 +125,7 @@ const ProjectDashboard = () => {
               </button>
             </div>
           </TransitionChild>
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-secDark border-r-2 border-r-primAccent px-6 pb-2 ring-1 ring-white/10">
+          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primDark border-r-2 border-r-primAccent px-6 pb-2 ring-1 ring-white/10">
             <div className="flex h-16 shrink-0 items-center">
               <h2>DevFusion</h2>
             </div>
@@ -161,7 +161,7 @@ const ProjectDashboard = () => {
                             {user?.id === projectOwnerId && member.user_id !== projectOwnerId && (
                               <button
                                 onClick={() => handleRemoveMember(member.user_id)}
-                                className="ml-auto p-2 bg-red-500 text-white rounded hover:bg-red-700 transition duration-300"
+                                className="ml-auto p-2 text-primAccent hover:text-red-500 transition duration-300"
                               >
                                 <IconTrash size={18} />
                               </button>
@@ -172,7 +172,7 @@ const ProjectDashboard = () => {
                     </div>
                     <div>
                       {user?.id === projectOwnerId && (
-                        <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-red-950 border-none p-2 w-max rounded-md transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
+                        <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-blue-800 border-none p-2 w-max rounded-md transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
                       )}
                     </div>
                   </div>
@@ -186,7 +186,7 @@ const ProjectDashboard = () => {
     </Dialog>
 
     <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
-      <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-secDark border-r-2 border-r-primAccent px-6">
+      <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primDark border-r border-r-primAccent px-6">
         <div className="flex h-16 shrink-0 items-center">
           <h2 className='font-bold text-2xl tracking-wider'>DevFusion</h2>
         </div>
@@ -222,7 +222,7 @@ const ProjectDashboard = () => {
                             {user?.id === projectOwnerId && member.user_id !== projectOwnerId && (
                               <button
                                 onClick={() => handleRemoveMember(member.user_id)}
-                                className="ml-auto p-2 text-primAccent hover:text-red-950 transition duration-200"
+                                className="ml-auto p-2 text-primAccent hover:text-red-500 transition duration-200"
                               >
                                 <IconTrash size={18} />
                               </button>
@@ -233,7 +233,7 @@ const ProjectDashboard = () => {
                     </div>
                     <div>
                       {user?.id === projectOwnerId && (
-                        <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-red-950 border-none p-2 w-max rounded-md transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
+                        <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-blue-800 border-none p-2 w-max rounded-md transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
                       )}
                     </div>
                   </div>
