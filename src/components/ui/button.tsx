@@ -10,14 +10,14 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primAccent text-slate-50 shadow hover:bg-red-950/90 dark:text-slate-900 dark:hover:bg-slate-50/90",
+          "bg-primAccent text-slate-50 shadow hover:bg-blue-950/90 dark:text-slate-900 dark:hover:bg-slate-50/90",
         destructive:
-          "bg-red-500 text-slate-50 shadow-sm hover:bg-red-500/90",
+          "bg-blue-500 text-slate-50 shadow-sm hover:bg-blue-500/90",
         outline:
-          "border border-primAccent bg-red shadow-sm hover:bg-red-100 hover:text-red-900",
+          "border border-primAccent bg-blue shadow-sm hover:bg-blue-100 hover:text-blue-900",
         secondary:
-          "bg-red-100 text-primDark shadow-sm hover:bg-red-100/80",
-        ghost: "hover:bg-red-100 hover:text-primAccent",
+          "bg-blue-100 text-primDark shadow-sm hover:bg-blue-100/80",
+        ghost: "hover:bg-blue-100 hover:text-primAccent",
         link: "text-slate-900 underline-offset-4 hover:underline dark:text-slate-50",
       },
       size: {

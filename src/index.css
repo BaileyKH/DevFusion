@@ -29,7 +29,7 @@
 @layer base {
   
   body {
-    @apply bg-secDark font-fira h-full scroll-smooth
+    @apply bg-primDark font-fira h-full scroll-smooth
   }
 
   .nav-gradient {
@@ -44,7 +44,7 @@
     right: 0;
     bottom: 0;
     height: 1px;
-    background: radial-gradient(circle, #931621, #0f0f0f);
+    background: radial-gradient(circle, #0398fc, #0f0f0f);
   }
   :root {
     --radius: 0.5rem; 
