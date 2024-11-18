@@ -25,7 +25,7 @@ interface ProjectMember {
 
 const Tasks = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [newTask, setNewTask] = useState<string>('');
@@ -126,7 +126,7 @@ const Tasks = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3 xl:gap-x-8 my-4 h-screen">
+    <div className="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3 xl:gap-x-8 my-10 min-h-[200px]">
       {members.map((member) => (
         <div key={member.id} className="overflow-hidden rounded-xl border border-darkAccent/65 ">
           <div className='flex flex-col justify-center bg-secDark p-4 nav-gradient'>
@@ -147,7 +147,7 @@ const Tasks = () => {
                   className='w-64 placeholder:text-darkAccent/65 border-darkAccent/65'
                 />
                 <button type="submit">
-                  <IconPlus stroke={2} className='text-primAccent w-[6] h-[6] ml-3 border border-primAccent rounded-md hover:bg-red-200 transition-colors duration-200 ease-in'/>
+                  <IconPlus stroke={2} className='text-primAccent w-[6] h-[6] ml-3 border border-primAccent rounded-md hover:bg-blue-200 transition-colors duration-200 ease-in'/>
                 </button>
               </form>
             )}
@@ -169,7 +169,7 @@ const Tasks = () => {
                   </div>
                   {task.user_id === user.id && (
                     <button
-                      className="ml-4 text-red-500"
+                      className="ml-4 text-primAccent hover:text-red-500"
                       onClick={() => handleDeleteTask(task.id)}
                     >
                       <IconTrash stroke={1} />
