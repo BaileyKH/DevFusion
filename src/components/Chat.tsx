@@ -20,7 +20,7 @@ interface ChatMessage {
 
 export const Chat = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isAtBottom, setIsAtBottom] = useState(true);

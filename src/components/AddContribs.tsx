@@ -1,6 +1,5 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { supabase } from '../supabaseDB';
-import { UserContext } from '../App';
 
 import { IconPlus } from '@tabler/icons-react';
 
@@ -12,7 +11,6 @@ interface AddContributorProps {
   }
 
   export const AddContribs = ({ projectId }: AddContributorProps) => {
-  const user = useContext(UserContext);
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [error, setError] = useState('');
@@ -106,8 +104,8 @@ interface AddContributorProps {
                       {result.avatar_url ? (
                         <img src={result.avatar_url} className="h-10 w-10 rounded-full"/>
                       ) : (
-                        <div className="h-10 w-10 rounded-full bg-gray-300 text-lg text-primAccent">
-                          {user.username[0].toUpperCase()}
+                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-300 text-lg text-primAccent">
+                          {result.username[0].toUpperCase()}
                         </div>
                       )}
                     </div>
@@ -124,26 +122,4 @@ interface AddContributorProps {
       </div>
     </div>
   )
-
-  return (
-    <div className="">
-      <h2>Add Contributors</h2>
-      <input
-        type="text"
-        placeholder="Search by username or email"
-        value={usernameOrEmail}
-        onChange={(e) => setUsernameOrEmail(e.target.value)}
-      />
-      <button onClick={handleSearch}>Search</button>
-      {error && <p className="error">{error}</p>}
-      <ul>
-        {searchResults.map((result) => (
-          <li key={result.id}>
-            {result.username}
-            <button onClick={() => handleAddContributor(result.id)}>Add</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
 };

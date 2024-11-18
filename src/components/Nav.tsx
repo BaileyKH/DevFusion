@@ -4,13 +4,13 @@ import { UserContext } from "../App";
 import { ProfileModal } from "./ProfileModal";
 
 export const Nav = () => {
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
   return (
     <>
-      <nav className="flex justify-between items-center p-4 bg-secDark text-lightAccent shadow-md nav-gradient">
+      <nav className="flex justify-between items-center p-4 bg-primDark text-lightAccent shadow-md nav-gradient">
         <Link to="/" className="text-2xl font-bold text-lightAccent">
           DevFusion
         </Link>

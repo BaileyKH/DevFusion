@@ -6,7 +6,7 @@ import { AddContribs } from './AddContribs';
 
 export const NewContribs = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [project, setProject] = useState<any>(null);
 
   if (!projectId) {

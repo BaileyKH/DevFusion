@@ -16,11 +16,11 @@ import {
 import ShineBorder from "@/components/ui/shine-border";
 
 const ChangeLog = () => {
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const { projectId } = useParams<{ projectId: string }>();
   const [commits, setCommits] = useState([]);
   const [githubRepoUrl, setGithubRepoUrl] = useState('');
-  const githubToken = localStorage.getItem('github_token');
+  const githubToken = user.github_token;
 
   // Fetch project information to get GitHub repo URL
   const fetchProject = async () => {
@@ -71,7 +71,7 @@ const ChangeLog = () => {
         <p>No commits found for this repository.</p>
       ) : (
         <div className='bg-primDark rounded-lg'>
-          <ShineBorder borderWidth={1} color={'#931621'} className='w-full p-4'>
+          <ShineBorder borderWidth={1} color={'#0398fc'} className='w-full p-4'>
           <Table>
           <TableCaption>A list of the most recent change logs.</TableCaption>
           <TableHeader>

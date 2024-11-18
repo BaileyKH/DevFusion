@@ -16,7 +16,15 @@ const ChangeLog = lazy(() => import("./components/ChangeLog"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 const ProjectDashboard = lazy(() => import("./pages/dashboard/ProjectDashboard"));
 
-export const UserContext = createContext<any>(null);
+interface UserContextType {
+  user: any;
+  setUser: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const UserContext = createContext<UserContextType>({
+  user: null,
+  setUser: () => {},
+});
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -36,10 +44,10 @@ function App() {
         if (session) {
           const { data: userProfile, error: userError } = await supabase
             .from('users')
-            .select('username, email, avatar_url, display_color')
+            .select('username, email, avatar_url, display_color, github_token') 
             .eq('id', session.user.id)
             .single();
-  
+
           if (userError) {
             console.error('Error fetching user profile:', userError);
           } else {
@@ -52,7 +60,7 @@ function App() {
       setLoading(false);
     };
     fetchSession();
-  
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
@@ -63,12 +71,11 @@ function App() {
         }
       }
     );
-  
+
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
-  
 
   if (loading) {
     return <div>Loading...</div>;
@@ -77,7 +84,7 @@ function App() {
   const isProjectDashboard = location.pathname.startsWith('/projects');
 
   return (
-    <UserContext.Provider value={user}>
+    <UserContext.Provider value={{ user, setUser }}>
       <div>
         {!isProjectDashboard && <Nav />}
         <Routes>
