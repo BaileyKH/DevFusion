@@ -6,7 +6,6 @@ import axios from 'axios';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -38,14 +37,14 @@ export const NewProject: React.FC<NewProjectProps> = ({
   const [projectDescription, setProjectDescription] = useState('');
   const [connectToGitHub, setConnectToGitHub] = useState(false);
   const [loading, setLoading] = useState(false);
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [repos, setRepos] = useState<any[]>([]);
   const [selectedRepo, setSelectedRepo] = useState('');
 
   useEffect(() => {
     const fetchRepos = async () => {
-      if (connectToGitHub) {
-        const githubToken = localStorage.getItem('github_token');
+      if (connectToGitHub && user && user.github_token) {
+        const githubToken = user.github_token;
         if (githubToken) {
           try {
             const response = await axios.get('https://api.github.com/user/repos', {
@@ -56,15 +55,26 @@ export const NewProject: React.FC<NewProjectProps> = ({
             setRepos(response.data);
           } catch (error) {
             console.error('Error fetching repos:', error);
+            setRepos([]); 
           }
         } else {
           console.warn('GitHub token missing or connectToGitHub is false');
+          setRepos([]); 
         }
       }
     };
 
     fetchRepos();
-  }, [connectToGitHub]);
+  }, [connectToGitHub, user]); 
+
+  // Clear the repos and selectedRepo when user disconnects GitHub
+  useEffect(() => {
+    if (!user || !user.github_token) {
+      setRepos([]);
+      setSelectedRepo('');
+      setConnectToGitHub(false); 
+    }
+  }, [user]);
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,6 +155,7 @@ export const NewProject: React.FC<NewProjectProps> = ({
                   id="connectToGitHub"
                   checked={connectToGitHub}
                   onCheckedChange={(checked) => setConnectToGitHub(checked === true)}
+                  disabled={!user?.github_token} 
                 />
                 <Label htmlFor="connectToGitHub">
                   Connect GitHub Repo
