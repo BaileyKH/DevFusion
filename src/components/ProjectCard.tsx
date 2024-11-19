@@ -55,18 +55,18 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
       className="hover:scale-105 transform transition duration-300 cursor-pointer relative w-full"
       onClick={handleClick}
     >
-      <div className='border border-darkAccent/65 hover:border-primAccent/65 rounded-lg w-full'>
+      <div className='hover:border-primAccent/65 rounded-lg w-full project-card-shadow'>
         <Card className='w-full h-[250px] border-none'>
           <CardHeader>
-            <CardTitle className='text-primAccent'>{project.name}</CardTitle>
+            <CardTitle className='text-primAccent text-lg font-bold tracking-wide'>{project.name}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className='text-lightAccent/70'>{project.description}</p>
+            <p className='text-lightAccent/85'>{project.description}</p>
           </CardContent>
           <CardFooter>
             {project.github_repo_url && (
-              <p className="text-lightAccent/70 mt-16">
-                <strong className='text-lightAccent'>Repo:</strong> {project.github_repo_url}
+              <p className="text-lightAccent/60 mt-16">
+                <strong className='text-lightAccent/85'>Repo:</strong> {project.github_repo_url}
               </p>
             )}
             <IconTrash
