@@ -92,7 +92,7 @@ const ChangeLog = () => {
                   href={commit.html_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-lightAccent/85 hover:text-primAccent underline underline-offset-4"
+                  className="text-lightAccent/85 hover:text-blue-800 underline underline-offset-4"
                 >
                   View Commit
                 </a></TableCell>
