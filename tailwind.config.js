@@ -11,7 +11,7 @@ export default {
   			fira: ['Fira Code"', 'monospace']
   		},
   		colors: {
-  			primDark: '#000000',
+  			primDark: '#121212',
   			secDark: '#080808',
   			primAccent: '#0398fc',
   			lightAccent: '#FFFFFF',

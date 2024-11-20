@@ -32,7 +32,11 @@
     @apply bg-primDark font-fira h-full scroll-smooth
   }
 
-  .nav-gradient {
+  .nav-shadow {
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .nav-gradient, .task-gradient {
     position: relative;
     padding-bottom: 1px;
   }
@@ -46,8 +50,21 @@
     height: 1px;
     background: radial-gradient(circle, #0398fc, #0f0f0f);
   }
+  .task-gradient::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: radial-gradient(circle, #0398fc, rgba(255, 255, 255, .10));
+  }
   :root {
     --radius: 0.5rem; 
+  }
+
+  .project-card-shadow {
+    box-shadow: 1px 3px 8px rgba(0, 0, 0, .2), -1px 0px 8px rgba(0, 0, 0, .2);
   }
 
 }
