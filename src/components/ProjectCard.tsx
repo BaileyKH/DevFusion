@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseDB';
-import { memo } from 'react';
+import { memo, useContext } from 'react';
+import { UserContext } from '../App';
 
 import { IconTrash } from '@tabler/icons-react';
 
@@ -10,7 +11,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 interface ProjectCardProps {
   project: any;
@@ -19,6 +20,7 @@ interface ProjectCardProps {
 
 const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete }) => {
   const navigate = useNavigate();
+  const { user } = useContext(UserContext);
 
   const handleClick = () => {
     navigate(`/projects/${project.id}`);
@@ -33,19 +35,65 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
     if (!confirmDelete) return;
 
     try {
-      // Delete related tasks, memberships, and project itself
-      const { error: projectError } = await supabase.from('projects').delete().eq('id', project.id);
+      // Fetch the current user's role in the project_memberships table
+      const { data: membership, error: membershipFetchError } = await supabase
+        .from('project_memberships')
+        .select('role')
+        .eq('project_id', project.id)
+        .eq('user_id', user.id)
+        .single();
 
-      if (projectError) {
-        console.error('Error deleting project:', projectError);
-        alert('Error deleting the project.');
+      if (membershipFetchError || !membership) {
+        alert('Error fetching membership details. Please try again.');
         return;
       }
 
-      // Notify the parent component that the project was deleted
-      onDelete(project.id);
+      // Check the role of the current user in this project
+      const userRole = membership.role;
+
+      if (userRole === 'owner') {
+  
+        // Delete all project memberships
+        const { error: membershipDeleteError } = await supabase
+          .from('project_memberships')
+          .delete()
+          .eq('project_id', project.id);
+      
+        if (membershipDeleteError) {
+          alert('Error deleting project memberships.');
+          return;
+        }
+      
+        // Delete the project itself
+        const { error: projectDeleteError } = await supabase
+          .from('projects')
+          .delete()
+          .eq('id', project.id);
+      
+        if (projectDeleteError) {
+          alert('Error deleting the project.');
+          return;
+        }
+      
+        alert('Project deleted successfully.');
+        onDelete(project.id);
+      } else {
+        // User is a collaborator, only remove their membership
+        const { error: membershipDeleteError } = await supabase
+          .from('project_memberships')
+          .delete()
+          .eq('project_id', project.id)
+          .eq('user_id', user.id);
+      
+        if (membershipDeleteError) {
+          alert('Error removing you from the project.');
+          return;
+        }
+      
+        alert('You have been removed from the project successfully.');
+        onDelete(project.id);
+      }
     } catch (error) {
-      console.error('Unexpected error deleting project:', error);
       alert('An unexpected error occurred while deleting the project.');
     }
   };
@@ -82,6 +130,3 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
 };
 
 export const ProjectCard = memo(ProjectCardComponent);
-
-
-
