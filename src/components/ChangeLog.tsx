@@ -65,12 +65,12 @@ const ChangeLog = () => {
   }, [githubRepoUrl]);
 
   return (
-    <div className="p-4">
+    <div className="p-4 w-full h-screen">
       <h1 className="text-2xl font-bold mb-4">Change Log</h1>
       {commits.length === 0 ? (
         <p>No commits found for this repository.</p>
       ) : (
-        <div className='bg-primDark rounded-lg'>
+        <div className='bg-primDark rounded-lg project-card-shadow'>
           <ShineBorder borderWidth={1} color={'#0398fc'} className='w-full p-4'>
           <Table>
           <TableCaption>A list of the most recent change logs.</TableCaption>
@@ -84,15 +84,15 @@ const ChangeLog = () => {
           </TableHeader>
           <TableBody>
             {commits.map((commit: any, index: number) => (
-                <TableRow key={index}>
-                  <TableCell className='text-lightAccent'>{commit.commit.author.name}</TableCell>
-                  <TableCell className='text-lightAccent'>{new Date(commit.commit.author.date).toLocaleDateString()}</TableCell>
-                  <TableCell className='text-lightAccent'>{commit.commit.message}</TableCell>
+                <TableRow key={index} className='border-lightAccent/60'>
+                  <TableCell className='text-lightAccent/85'>{commit.commit.author.name}</TableCell>
+                  <TableCell className='text-lightAccent/85'>{new Date(commit.commit.author.date).toLocaleDateString()}</TableCell>
+                  <TableCell className='text-lightAccent/85'>{commit.commit.message}</TableCell>
                   <TableCell className="text-right">        <a
                   href={commit.html_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-lightAccent hover:text-primAccent underline underline-offset-4"
+                  className="text-lightAccent/85 hover:text-primAccent underline underline-offset-4"
                 >
                   View Commit
                 </a></TableCell>

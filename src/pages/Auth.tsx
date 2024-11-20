@@ -160,7 +160,7 @@ export const Auth = () => {
             <Button
               onClick={handleAuth}
               disabled={authenticating}
-              className="flex w-full justify-center rounded-md bg-primAccent px-3 py-1.5 text-sm/6 font-semibold text-lightAccent shadow-sm hover:bg-red-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primAccent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex w-full justify-center rounded-md bg-primAccent px-3 py-1.5 text-sm/6 font-semibold text-lightAccent shadow-sm hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primAccent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSignUp ? 'Sign Up' : 'Sign In'}
             </Button>

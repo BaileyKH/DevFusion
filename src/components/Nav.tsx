@@ -10,8 +10,8 @@ export const Nav = () => {
 
   return (
     <>
-      <nav className="flex justify-between items-center p-4 bg-primDark text-lightAccent shadow-md nav-gradient">
-        <Link to="/" className="text-2xl font-bold text-lightAccent">
+      <nav className="flex justify-between items-center p-4 bg-white/5 text-lightAccent/85 nav-shadow">
+        <Link to="/" className="text-2xl font-bold text-lightAccent/85">
           DevFusion
         </Link>
         <div className="flex items-center space-x-4">

@@ -126,60 +126,62 @@ const Tasks = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3 xl:gap-x-8 my-10 min-h-[200px]">
-      {members.map((member) => (
-        <div key={member.id} className="overflow-hidden rounded-xl border border-darkAccent/65 ">
-          <div className='flex flex-col justify-center bg-secDark p-4 nav-gradient'>
-            <div className='flex items-end mb-4 gap-x-4'>
-              {member.avatar_url ? (
-                <img src={member.avatar_url} className="h-10 w-10 rounded-full"/> ) : (
-                <IconUserCircle stroke={1} className="h-10 w-10 rounded-full"/>
+    <div className='w-full h-screen'>
+      <div className="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3 xl:gap-x-8 my-10 min-h-[200px]">
+        {members.map((member) => (
+          <div key={member.id} className="overflow-hidden rounded-xl project-card-shadow">
+            <div className='flex flex-col justify-center bg-white/10 p-4 task-gradient'>
+              <div className='flex items-end mb-4 gap-x-4'>
+                {member.avatar_url ? (
+                  <img src={member.avatar_url} className="h-10 w-10 rounded-full"/> ) : (
+                  <IconUserCircle stroke={1} className="h-10 w-10 rounded-full"/>
+                )}
+                <h2 className="font-bold mb-2 text-lightAccent/85">{member.username}</h2>
+              </div>
+              {member.id === user.id && (
+                <form onSubmit={(e) => handleAddTask(e, member.id)} className='flex'>
+                  <Input
+                    type="text"
+                    value={newTask}
+                    onChange={(e) => setNewTask(e.target.value)}
+                    placeholder="New Task"
+                    className='w-64 placeholder:text-darkAccent/65 border-darkAccent/65'
+                  />
+                  <button type="submit">
+                    <IconPlus stroke={2} className='text-primAccent w-[6] h-[6] ml-3 border border-primAccent rounded-md hover:bg-blue-200 transition-colors duration-200 ease-in'/>
+                  </button>
+                </form>
               )}
-              <h2 className="font-bold mb-2">{member.username}</h2>
             </div>
-            {member.id === user.id && (
-              <form onSubmit={(e) => handleAddTask(e, member.id)} className='flex'>
-                <Input
-                  type="text"
-                  value={newTask}
-                  onChange={(e) => setNewTask(e.target.value)}
-                  placeholder="New Task"
-                  className='w-64 placeholder:text-darkAccent/65 border-darkAccent/65'
-                />
-                <button type="submit">
-                  <IconPlus stroke={2} className='text-primAccent w-[6] h-[6] ml-3 border border-primAccent rounded-md hover:bg-blue-200 transition-colors duration-200 ease-in'/>
-                </button>
-              </form>
-            )}
+            <ul className='bg-white/15 p-4 h-full'>
+              {tasks
+                .filter((task) => task.user_id === member.id)
+                .map((task) => (
+                  <li key={task.id} className="flex justify-between items-center mb-2">
+                    <div className='flex items-center'>
+                      <Checkbox
+                        onCheckedChange={() => handleToggleTask(task.id, task.is_completed)}
+                        checked={task.is_completed}
+                        disabled={task.user_id !== user.id}
+                      />
+                      <span className={`ml-2 text-lightAccent/85 ${task.is_completed ? 'line-through' : ''}`}>
+                        {task.description}
+                      </span>
+                    </div>
+                    {task.user_id === user.id && (
+                      <button
+                        className="ml-4 text-primAccent hover:text-red-500"
+                        onClick={() => handleDeleteTask(task.id)}
+                      >
+                        <IconTrash stroke={1} />
+                      </button>
+                    )}
+                  </li>
+                ))}
+            </ul>
           </div>
-          <ul className='bg-primDark p-4 h-full'>
-            {tasks
-              .filter((task) => task.user_id === member.id)
-              .map((task) => (
-                <li key={task.id} className="flex justify-between items-center mb-2">
-                  <div className='flex items-center'>
-                    <Checkbox
-                      onCheckedChange={() => handleToggleTask(task.id, task.is_completed)}
-                      checked={task.is_completed}
-                      disabled={task.user_id !== user.id}
-                    />
-                    <span className={`ml-2 ${task.is_completed ? 'line-through' : ''}`}>
-                      {task.description}
-                    </span>
-                  </div>
-                  {task.user_id === user.id && (
-                    <button
-                      className="ml-4 text-primAccent hover:text-red-500"
-                      onClick={() => handleDeleteTask(task.id)}
-                    >
-                      <IconTrash stroke={1} />
-                    </button>
-                  )}
-                </li>
-              ))}
-          </ul>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

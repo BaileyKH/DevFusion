@@ -218,7 +218,7 @@ const ProjectDashboard = () => {
                                 {member.users.username[0].toUpperCase()}
                               </div>
                             )}
-                            <p className="font-medium text-lightAccent text-sm">{member.users.username}</p>
+                            <p className="font-medium text-white/85 text-sm">{member.users.username}</p>
                             {user?.id === projectOwnerId && member.user_id !== projectOwnerId && (
                               <button
                                 onClick={() => handleRemoveMember(member.user_id)}
@@ -240,7 +240,7 @@ const ProjectDashboard = () => {
               </ul>
             </li>
             <li className="-mx-6 mt-auto">
-              <div className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-lightAccent">
+              <div className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-white/85">
                 {user && user.avatar_url ? (
                     <img
                       src={user.avatar_url}
@@ -254,7 +254,7 @@ const ProjectDashboard = () => {
                     </div>
                 )}
                   <span className="sr-only">Your profile</span>
-                  <span aria-hidden="true" className='text-lightAccent'>{user.username}</span>
+                  <span aria-hidden="true" className='text-white/85'>{user.username}</span>
                 </div>
             </li>
             {isUserModalOpen && (
@@ -266,11 +266,11 @@ const ProjectDashboard = () => {
     </div> 
 
     <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-      <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-gray-400 lg:hidden">
+      <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-white/85 lg:hidden">
         <span className="sr-only">Open sidebar</span>
         <IconMenu2 aria-hidden="true" className="h-6 w-6" />
       </button>
-      <div className="flex-1 text-sm/6 font-semibold text-white">Dashboard</div>
+      <div className="flex-1 text-sm/6 font-semibold text-white/85">Dashboard</div>
         <span className="sr-only">Your profile</span>
         <img
           src={user.avatar_url}
@@ -283,8 +283,8 @@ const ProjectDashboard = () => {
         )}
     </div>
 
-    <main className="flex-grow overflow-hidden lg:pl-72">
-      <div className="h-full overflow-hidden px-4 sm:px-6 lg:px-8"><Outlet /></div>
+    <main className="flex-grow overflow-hidden lg:pl-72 bg-white/5">
+      <div className="h-full overflow-hidden px-4 sm:px-6 lg:px-8"><Outlet/></div>
     </main>
   </div>
   );

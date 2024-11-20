@@ -66,9 +66,9 @@ const Dashboard = () => {
   }, [user]);
 
   return (
-    <div className="p-4">
+    <div className="p-4 h-full">
       <div className='flex justify-between items-center'>
-        <h1 className="text-2xl font-bold mb-4 text-lightAccent">Your Projects</h1>
+        <h1 className="text-2xl font-bold mb-4 text-lightAccent/85">Your Projects</h1>
         <button
           className="mb-4 p-2 bg-primAccent hover:bg-blue-800 transition duration-300 text-lightAccent rounded"
           onClick={() => setIsModalOpen(true)}
