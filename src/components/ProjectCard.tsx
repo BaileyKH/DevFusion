@@ -55,7 +55,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
       className="hover:scale-105 transform transition duration-300 cursor-pointer relative w-full"
       onClick={handleClick}
     >
-      <div className='hover:border-primAccent/65 rounded-lg w-full project-card-shadow'>
+      <div className='rounded-lg w-full project-card-shadow'>
         <Card className='w-full h-[250px] border-none'>
           <CardHeader>
             <CardTitle className='text-primAccent text-lg font-bold tracking-wide'>{project.name}</CardTitle>
