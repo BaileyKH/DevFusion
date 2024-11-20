@@ -39,7 +39,7 @@ export const Nav = () => {
           ) : (
             <button
               onClick={() => navigate('/auth')}
-              className="bg-primAccent hover:bg-red-950 px-3 py-1 rounded-md transition duration-300"
+              className="bg-primAccent hover:bg-blue-800 px-3 py-1 rounded-md transition duration-300"
             >
               Sign In
             </button>
