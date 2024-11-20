@@ -16,6 +16,8 @@ const ChangeLog = lazy(() => import("./components/ChangeLog"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 const ProjectDashboard = lazy(() => import("./pages/dashboard/ProjectDashboard"));
 
+import { Toaster } from "@/components/ui/toaster"
+
 interface UserContextType {
   user: any;
   setUser: React.Dispatch<React.SetStateAction<any>>;
@@ -139,6 +141,7 @@ function App() {
           </Route>
         </Routes>
       </div>
+      <Toaster />
     </UserContext.Provider>
   );
 }

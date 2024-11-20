@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseDB';
-import { memo, useContext } from 'react';
+import { memo, useContext, useState } from 'react';
 import { UserContext } from '../App';
 
 import { IconTrash } from '@tabler/icons-react';
@@ -13,6 +13,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+import { useToast } from "@/hooks/use-toast"
+
 interface ProjectCardProps {
   project: any;
   onDelete: (projectId: string) => void;
@@ -21,18 +35,15 @@ interface ProjectCardProps {
 const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete }) => {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
+  const { toast } = useToast(); 
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleClick = () => {
     navigate(`/projects/${project.id}`);
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation(); 
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete the project "${project.name}"? This action cannot be undone.`
-    );
-
-    if (!confirmDelete) return;
+  const handleDelete = async () => {
+    setIsDeleting(true);
 
     try {
       // Fetch the current user's role in the project_memberships table
@@ -44,7 +55,11 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
         .single();
 
       if (membershipFetchError || !membership) {
-        alert('Error fetching membership details. Please try again.');
+        toast({
+          title: "Error",
+          description: "Error fetching membership details. Please try again.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -52,30 +67,40 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
       const userRole = membership.role;
 
       if (userRole === 'owner') {
-  
         // Delete all project memberships
         const { error: membershipDeleteError } = await supabase
           .from('project_memberships')
           .delete()
           .eq('project_id', project.id);
-      
+
         if (membershipDeleteError) {
-          alert('Error deleting project memberships.');
+          toast({
+            title: "Error",
+            description: "Error deleting project memberships.",
+            variant: "destructive",
+          });
           return;
         }
-      
+
         // Delete the project itself
         const { error: projectDeleteError } = await supabase
           .from('projects')
           .delete()
           .eq('id', project.id);
-      
+
         if (projectDeleteError) {
-          alert('Error deleting the project.');
+          toast({
+            title: "Error",
+            description: "Error deleting the project.",
+            variant: "destructive",
+          });
           return;
         }
-      
-        alert('Project deleted successfully.');
+
+        toast({
+          title: "Success",
+          description: "Project deleted successfully.",
+        });
         onDelete(project.id);
       } else {
         // User is a collaborator, only remove their membership
@@ -84,17 +109,30 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
           .delete()
           .eq('project_id', project.id)
           .eq('user_id', user.id);
-      
+
         if (membershipDeleteError) {
-          alert('Error removing you from the project.');
+          toast({
+            title: "Error",
+            description: "Error removing you from the project.",
+            variant: "destructive",
+          });
           return;
         }
-      
-        alert('You have been removed from the project successfully.');
+
+        toast({
+          title: "Success",
+          description: "You have been removed from the project successfully.",
+        });
         onDelete(project.id);
       }
     } catch (error) {
-      alert('An unexpected error occurred while deleting the project.');
+      toast({
+        title: "Unexpected Error",
+        description: "An unexpected error occurred while deleting the project.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -117,11 +155,31 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
                 <strong className='text-lightAccent/85'>Repo:</strong> {project.github_repo_url}
               </p>
             )}
-            <IconTrash
-              stroke={1}
-              onClick={handleDelete}
-              className="absolute bottom-4 right-4 text-primAccent h-6 w-6 transition duration-300 hover:text-red-500"
-            />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <IconTrash
+                  stroke={1}
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                  }}
+                  className="absolute bottom-4 right-4 text-primAccent h-6 w-6 transition duration-300 hover:text-red-500"
+                />
+              </AlertDialogTrigger>
+              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete the project "{project.name}"? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className='text-lightAccent'>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardFooter>
         </Card>
       </div>
