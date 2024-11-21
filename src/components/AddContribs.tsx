@@ -5,6 +5,7 @@ import { IconPlus } from '@tabler/icons-react';
 
 import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button';
+import { useToast } from "@/hooks/use-toast"
 
 interface AddContributorProps {
     projectId: string;
@@ -13,17 +14,21 @@ interface AddContributorProps {
   export const AddContribs = ({ projectId }: AddContributorProps) => {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [error, setError] = useState('');
+  const { toast } = useToast();
 
   const handleSearch = async () => {
-    setError('');
     const { data, error } = await supabase
       .from('users')
       .select('id, username, email, avatar_url')
       .or(`username.ilike.%${usernameOrEmail}%,email.ilike.%${usernameOrEmail}%`);
   
     if (error) {
-      setError('Error searching users.');
+      toast({
+        title: "Error",
+        description: "Error searching users",
+        variant: "destructive",
+      });
+      return;
     } else {
       setSearchResults(data || []);
     }
@@ -38,7 +43,11 @@ interface AddContributorProps {
       .single();
   
     if (existingMembership) {
-      setError('User is already a contributor.');
+      toast({
+        title: "Error",
+        description: "User is already a contributor",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -48,19 +57,27 @@ interface AddContributorProps {
     });
   
     if (error) {
-      setError('Error adding contributor.');
+      toast({
+        title: "Error",
+        description: "Error adding contributor",
+        variant: "destructive",
+      });
+      return;
     } else {
-      setError('Contributor added successfully!');
+      toast({
+        title: "Success",
+        description: "Contributor added successfully!",
+      });
     }
   };
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="mx-auto max-w-lg h-screen">
       <div>
         <div className="text-center">
           <svg
             fill="none"
-            stroke="#931621"
+            stroke="#0398fc"
             viewBox="0 0 48 48"
             aria-hidden="true"
             className="mx-auto h-12 w-12 text-gray-400"
@@ -93,7 +110,6 @@ interface AddContributorProps {
             Search
           </Button>
         </form>
-        {error && <p className="text-center mt-4">{error}</p>}
       </div>
       <div className="mt-6">
         <ul role="list" className="mt-4 divide-y divide-primAccent border-b border-t border-primAccent">

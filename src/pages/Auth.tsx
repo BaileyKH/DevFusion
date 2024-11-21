@@ -2,6 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseDB";
 
+import {
+  Card,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from '@/components/ui/button';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +21,8 @@ export const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [error, setError] = useState('')
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,6 +53,7 @@ export const Auth = () => {
 
   const handleAuth = async () => {
     setAuthenticating(true);
+    setError('')
 
     if (isSignUp) {
       // Check for existing usernames to prevent duplicates
@@ -52,13 +63,13 @@ export const Auth = () => {
         .eq('username', username);
 
       if (usernameError) {
-        alert('Error checking username availability.');
+        setError('Error checking username availability.');
         setAuthenticating(false);
         return;
       }
 
       if (existingUsernames && existingUsernames.length > 0) {
-        alert('Username already exists. Please choose another one.');
+        setError('Username already exists. Please choose another one.');
         setAuthenticating(false);
         return;
       }
@@ -76,17 +87,22 @@ export const Auth = () => {
       if (error) {
         alert(error.message);
       } else {
-        alert('Sign-up successful! Please check your email to confirm your account.');
+        setModalOpen(true);
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        alert(error.message);
+        setError("Incorrect Username or Password, please try again.")
       }
     }
 
     setAuthenticating(false);
   };
+
+  const handleSignUpRedirect = () => {
+    setModalOpen(false);
+    navigate('/')
+  }
 
   if (isCheckingSession) {
     return <div>Loading...</div>;
@@ -96,6 +112,7 @@ export const Auth = () => {
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-lightAccent">{isSignUp ? 'Create an account' : 'Sign in to your account'}</h2>
+        {error && <p className="text-xs text-red-500 text-center mt-2">{error}</p>}
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -171,6 +188,22 @@ export const Auth = () => {
           {isSignUp ? 'Already have an account? Sign In' : 'Don’t have an account? Sign Up'}
         </p>
       </div>
+      {modalOpen && 
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <Card className="bg-primDark">
+            <CardHeader>
+              <CardTitle className="text-lightAccent/85">Success!</CardTitle>
+              <CardDescription className="text-lightAccent/60">Thank you for signing up with DevFusion!</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>Please check your email to verify your new account. Happy Collaborating!</p>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleSignUpRedirect}>Close</Button>
+            </CardFooter>
+          </Card>
+        </div>
+      }
     </div>
   );
 };

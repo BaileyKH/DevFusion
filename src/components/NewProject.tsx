@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from '@/components/ui/button';
+import { useToast } from "@/hooks/use-toast"
 
 interface NewProjectProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export const NewProject: React.FC<NewProjectProps> = ({
   const { user } = useContext(UserContext);
   const [repos, setRepos] = useState<any[]>([]);
   const [selectedRepo, setSelectedRepo] = useState('');
+  const { toast } = useToast(); 
 
   useEffect(() => {
     const fetchRepos = async () => {
@@ -94,10 +96,17 @@ export const NewProject: React.FC<NewProjectProps> = ({
       });
 
       if (error) {
-        console.error('Error creating project:', error);
-        alert(`Error creating project: ${error.message}`);
+        toast({
+          title: "Error",
+          description: "Error creating project.",
+          variant: "destructive",
+        });
+        return;
       } else if (data) {
-        console.log('Project created successfully:', data);
+        toast({
+          title: "Success",
+          description: "Project created successfully.",
+        });
         if (connectToGitHub && selectedRepo) {
           const { error: updateError } = await supabase
             .from('projects')

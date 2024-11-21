@@ -6,6 +6,7 @@ import { UserContext } from '../App';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast"
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [avatarUploadError, setAvatarUploadError] = useState<string | null>(null);
   const [isGitHubConnected, setIsGitHubConnected] = useState(false);
+  const { toast } = useToast();
 
   const navigate = useNavigate();
 
@@ -104,9 +106,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
 
           if (updateError) {
             console.error('Error updating avatar URL:', updateError);
-            alert('Error updating avatar URL. Please try again.');
+            toast({
+              title: "Error",
+              description: "Error updating avatar URL. Please try again",
+              variant: "destructive",
+            });
+            return;
           } else {
-            alert('Avatar updated successfully!');
+            toast({
+              title: "Success",
+              description: "Avatar updated successfully!",
+            });
             await refreshUserData();
           }
         }
@@ -138,7 +148,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
         console.error('Error updating color:', error);
         setError('Error updating chat color. Please try again later.');
       } else {
-        alert('Chat color updated successfully.');
+        toast({
+          title: "Success",
+          description: "Chat color updated successfully.",
+        });
         await refreshUserData();
       }
     } catch (error) {
@@ -164,7 +177,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       setError('Error updating email.');
     } else {
       setError(null);
-      alert('Email updated successfully.');
+      toast({
+        title: "Success",
+        description: "Email updated successfully.",
+      });
       await refreshUserData();
     }
   };
@@ -187,7 +203,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       console.error('Error disconnecting GitHub:', error);
       setError('Error disconnecting GitHub.');
     } else {
-      alert('GitHub disconnected successfully.');
+      toast({
+        title: "Success",
+        description: "GitHub disconnected successfully",
+      });
       await refreshUserData();
     }
   };

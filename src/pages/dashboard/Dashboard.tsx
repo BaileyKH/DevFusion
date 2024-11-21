@@ -5,10 +5,13 @@ import { supabase } from '../../supabaseDB';
 import { NewProject } from '../../components/NewProject';
 import { ProjectCard } from '../../components/ProjectCard';
 
+import { useToast } from "@/hooks/use-toast"
+
 const Dashboard = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useContext(UserContext);
+  const { toast } = useToast();
 
   const fetchProjects = async () => {
     if (!user) {
@@ -24,7 +27,6 @@ const Dashboard = () => {
 
     if (membershipsError) {
       console.error('Error fetching memberships:', membershipsError);
-      alert(`Error fetching memberships: ${membershipsError.message}`);
       return;
     }
 
@@ -38,7 +40,12 @@ const Dashboard = () => {
 
       if (projectsError) {
         console.error('Error fetching projects:', projectsError);
-        alert(`Error fetching projects: ${projectsError.message}`);
+        toast({
+          title: "Error",
+          description: "Error fetching projects",
+          variant: "destructive",
+        });
+        return;
       } else {
         setProjects(projectsData);
       }

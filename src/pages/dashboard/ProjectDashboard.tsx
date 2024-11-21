@@ -18,6 +18,20 @@ import {
   IconUsers
 } from '@tabler/icons-react';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+import { useToast } from "@/hooks/use-toast"
+
 const ProjectDashboard = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,6 +39,7 @@ const ProjectDashboard = () => {
   const [members, setMembers] = useState<any[]>([]);
   const [projectOwnerId, setProjectOwnerId] = useState<string | null>(null);
   const { user } = useContext(UserContext);
+  const { toast } = useToast();
 
   // Fetch project members
   useEffect(() => {
@@ -77,12 +92,13 @@ const ProjectDashboard = () => {
   // Handles removing a member
   const handleRemoveMember = async (memberId: string) => {
     if (!user || user.id !== projectOwnerId) {
-      alert('You do not have permission to remove members.');
+      toast({
+        title: "Error",
+        description: "You do not have permission to remove members",
+        variant: "destructive",
+      });
       return;
     }
-
-    const confirmRemove = window.confirm('Are you sure you want to remove this member?');
-    if (!confirmRemove) return;
 
     try {
       const { error } = await supabase
@@ -93,14 +109,27 @@ const ProjectDashboard = () => {
 
       if (error) {
         console.error('Error removing member:', error);
-        alert('Error removing member. Please try again.');
+        toast({
+          title: "Error",
+          description: "Error removing member. Please try again",
+          variant: "destructive",
+        });
+        return;
       } else {
         setMembers((prevMembers) => prevMembers.filter((member) => member.user_id !== memberId));
-        alert('Member removed successfully.');
+        toast({
+          title: "Success",
+          description: "Member removed successfully",
+        });
       }
     } catch (error) {
       console.error('Unexpected error removing member:', error);
-      alert('An unexpected error occurred. Please try again.');
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again",
+        variant: "destructive",
+      });
+      return;
     }
   };
 
@@ -159,12 +188,31 @@ const ProjectDashboard = () => {
                             )}
                             <span className="font-medium">{member.users.username}</span>
                             {user?.id === projectOwnerId && member.user_id !== projectOwnerId && (
-                              <button
-                                onClick={() => handleRemoveMember(member.user_id)}
-                                className="ml-auto p-2 text-primAccent hover:text-red-500 transition duration-300"
-                              >
-                                <IconTrash size={18} />
-                              </button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <IconTrash
+                                    stroke={1}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); 
+                                    }}
+                                    className="ml-auto p-2 h-6 w-6 text-primAccent hover:text-red-500 transition duration-200"
+                                  />
+                                </AlertDialogTrigger>
+                                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to remove "{member.username}"?
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className='text-lightAccent'>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleRemoveMember(member.user_id)}>
+                                      Remove Member
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             )}
                           </li>
                         ))}
@@ -220,12 +268,31 @@ const ProjectDashboard = () => {
                             )}
                             <p className="font-medium text-white/85 text-sm">{member.users.username}</p>
                             {user?.id === projectOwnerId && member.user_id !== projectOwnerId && (
-                              <button
-                                onClick={() => handleRemoveMember(member.user_id)}
-                                className="ml-auto p-2 text-primAccent hover:text-red-500 transition duration-200"
-                              >
-                                <IconTrash size={18} />
-                              </button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <IconTrash
+                                    stroke={1}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); 
+                                    }}
+                                    className="ml-auto p-2 h-8 w-8 text-primAccent hover:text-red-500 transition duration-200 cursor-pointer"
+                                  />
+                                </AlertDialogTrigger>
+                                <AlertDialogContent onClick={(e) => e.stopPropagation()} className='w-max'>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Remove Member</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to remove <span className='text-primAccent'>{member.users.username}</span>?
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className='text-lightAccent'>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleRemoveMember(member.user_id)}>
+                                      Remove
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             )}
                           </li>
                         ))}
@@ -293,3 +360,5 @@ const ProjectDashboard = () => {
 export default ProjectDashboard;
 
 
+
+            
