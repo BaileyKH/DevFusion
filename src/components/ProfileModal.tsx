@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseDB';
 import { UserContext } from '../App';
 
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast"
+
+import { motion } from 'framer-motion';
+import { IconLogout, IconGitBranch, IconX, IconUpload } from "@tabler/icons-react";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -212,68 +216,88 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className='bg-primDark border border-darkAccent/30 rounded-lg w-96 p-4'>
-        <div className='mb-2'>
-            <h2 className='text-lightAccent/85'>User Settings</h2>
-            <p className='text-lightAccent/60 text-xs'>Make changes to your profile here</p>
-        </div>
-        {error && <p className="text-red-500">{error}</p>}
-        <div className='flex flex-col gap-y-6'>
-            <div className='flex justify-center items-center space-x-4 mt-1'>
-                <Label htmlFor='email' className='text-lightAccent/85 text-xs tracking-wide'>Email</Label>
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="bg-[#1e1e1e] border border-darkAccent/30 rounded-lg max-w-lg w-full p-6 relative"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-lightAccent/70 hover:text-lightAccent transition duration-300"
+        >
+          <IconX size={24} />
+        </button>
+        <Card className="bg-primDark border-none">
+          <CardHeader>
+            <h2 className="text-lightAccent text-3xl font-bold mb-4">User Settings</h2>
+            <p className="text-lightAccent/60 text-sm">Customize your profile and account settings.</p>
+            {error && <p className='text-red-500 my-2'>There was an issue updating your account settings. Please try again</p>}
+          </CardHeader>
+          <CardContent className="space-y-6 mt-6">
+            <div className="space-y-4">
+              <Label htmlFor="email" className="text-lightAccent text-sm tracking-wider">Email Address</Label>
+              <div className="flex space-x-4">
                 <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full text-lightAccent/85 border border-darkAccent/30 rounded"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-grow border border-darkAccent/30 text-lightAccent rounded-md"
                 />
-                <Button variant="outline" onClick={handleEmailChange} className='text-xs text-lightAccent/85 tracking-wider px-2 transition duration-300 ease-in'>Update</Button>
+                <Button variant="outline" onClick={handleEmailChange} className='text-lightAccent px-3 transition duration-300 ease-in'>Update</Button>
+              </div>
             </div>
-            <div>
-                <Label htmlFor='profile-picture' className='text-lightAccent/85 text-xs tracking-wide'>Profile Picture</Label>
-                <div className='flex items-center space-x-4 mt-1'>
-                    <Button variant="outline" onClick={handleButtonClick} className='text-xs text-lightAccent/85 px-2 transition duration-300 ease-in'>Upload File</Button>
-                    <Input
-                        id="profile-picture"
-                        type="file"
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                        onChange={handleAvatarUpload}
-                        className='text-lightAccent/85'
-                    />
-                </div>
-                {avatarUploadError && (
-                    <p className="text-red-500 mt-2">{avatarUploadError}</p>
-                )}
+
+            <div className="space-y-4">
+              <Label htmlFor="profile-picture" className="text-lightAccent text-sm tracking-wider">Profile Picture</Label>
+              {avatarUploadError && <p className='text-red-500 my-2'>Issue uploading profile picture, please try again</p>}
+              <div className="flex items-center space-x-4">
+                <Button variant="outline" onClick={handleButtonClick} className="text-lightAccent px-3 transition duration-300 ease-in flex items-center">
+                  <IconUpload size={18} className="mr-2"/>Upload File
+                </Button>
+                <Input
+                  id="profile-picture"
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleAvatarUpload}
+                />
+              </div>
             </div>
-            <div>
-                <Label htmlFor='profile-color' className='text-lightAccent/85 text-xs tracking-wide'>Profile Color</Label>
-                <div className='flex items-center space-x-4 mt-1'>
-                    <Input 
-                        id="profile-color"
-                        type="color"
-                        value={selectedColor}
-                        onChange={(e) => setSelectedColor(e.target.value)}
-                        className='w-[100px] p-0 text-lightAccent/85 border border-darkAccent/30 rounded'
-                    />
-                    <Button variant="outline" onClick={handleConfirmColor} className='text-xs text-lightAccent/85 tracking-wider px-2 transition duration-300 ease-in'>Confirm Color</Button>
-                </div>
+
+            <div className="space-y-4">
+              <Label htmlFor="profile-color" className="text-lightAccent text-sm tracking-wider">Profile Color</Label>
+              <div className="flex items-center space-x-4">
+                <Input
+                  id="profile-color"
+                  type="color"
+                  value={selectedColor}
+                  onChange={(e) => setSelectedColor(e.target.value)}
+                  className="w-[100px] border border-darkAccent/30 p-1 rounded-md"
+                />
+                <Button variant="outline" onClick={handleConfirmColor} className="text-lightAccent px-3 transition duration-300 ease-in">Confirm Color</Button>
+              </div>
             </div>
-            <div className='flex justify-between items-center my-8'>
-                {isGitHubConnected ? (
-                  <Button variant="outline" onClick={handleDisconnectGitHub} className='text-xs text-lightAccent/85 tracking-wider px-2 transition duration-300 ease-in'>Disconnect GitHub</Button>
-                ) : (
-                  <Button variant="outline" onClick={handleGitHubConnect} className='text-xs text-lightAccent/85 tracking-wider px-2 transition duration-300 ease-in'>Connect GitHub</Button>
-                )}
-                <Button variant="outline" onClick={handleSignOut} className='text-xs text-lightAccent/85 tracking-wider px-2 transition duration-300 ease-in'>Sign Out</Button>
+
+            <div className="flex justify-between items-center mt-8">
+              {isGitHubConnected ? (
+                <Button variant="outline" onClick={handleDisconnectGitHub} className="text-lightAccent tracking-wide px-3 transition duration-300 ease-in flex items-center">
+                  <IconGitBranch className="mr-2"/>Disconnect GitHub
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={handleGitHubConnect} className="text-lightAccent tracking-wide px-3 transition duration-300 ease-in flex items-center">
+                  <IconGitBranch className="mr-2"/>Connect GitHub
+                </Button>
+              )}
+              <Button variant="outline" onClick={handleSignOut} className="text-lightAccent tracking-wide px-3 transition duration-300 ease-in flex items-center">
+                <IconLogout className="mr-2"/>Sign Out
+              </Button>
             </div>
-            <div className='flex justify-end items-center'>
-                <Button variant="outline" onClick={onClose} className='text-xs text-lightAccent/85 border-primDark tracking-wider px-2 transition duration-300 ease-in'>Close</Button>
-            </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };
