@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseDB";
+import { motion } from "framer-motion";
 
 import {
   Card,
@@ -9,8 +10,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -109,101 +110,109 @@ export const Auth = () => {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-lightAccent">{isSignUp ? 'Create an account' : 'Sign in to your account'}</h2>
-        {error && <p className="text-xs text-red-500 text-center mt-2">{error}</p>}
-      </div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-tr from-[#121212] via-[#0d0d0d] to-[#141414]">
+      <motion.div
+        className="absolute inset-0 [mask-image:radial-gradient(800px_circle_at_center,white,transparent)] opacity-40"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.2 }}
+        transition={{ duration: 1.5 }}
+      />
+      <motion.div
+        className="w-full max-w-md px-6 py-12 rounded-xl bg-[#1a1a1a]/80 backdrop-blur-sm shadow-xl border border-lightAccent/10"
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 1, ease: "easeInOut" }}
+      >
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold tracking-tight text-lightAccent">
+            {isSignUp ? 'Create an Account' : 'Sign In to Your Account'}
+          </h2>
+          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+        </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <div className="space-y-6">
-          <div>
-            <Label htmlFor="email" className="block text-sm/6 font-medium text-lightAccent">
-              Email address
-            </Label>
-            <div className="mt-2">
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                onChange={(e) => setEmail(e.target.value)}
-                className="border-darkAccent/65 text-lightAccent"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="block text-sm/6 font-medium text-lightAccent">
-                Password
-              </Label>
-            </div>
-            <div className="mt-2">
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                className="border-darkAccent/65 text-lightAccent"
-              />
-            </div>
-          </div>
-
           {isSignUp && (
             <div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="username" className="block text-sm/6 font-medium text-lightAccent">
-                  Username
-                </Label>
-              </div>
-              <div className="mt-2">
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="border-darkAccent/65 text-lightAccent"
-                />
-              </div>
+              <Label htmlFor="username" className="text-sm font-medium text-lightAccent">
+                Username
+              </Label>
+              <Input
+                id="username"
+                type="text"
+                required
+                onChange={(e) => setUsername(e.target.value)}
+                className="mt-1 border-darkAccent/65 text-lightAccent"
+              />
             </div>
           )}
+          
+          <div>
+            <Label htmlFor="email" className="text-sm font-medium text-lightAccent">
+              Email Address
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 border-darkAccent/65 text-lightAccent"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="password" className="text-sm font-medium text-lightAccent">
+              Password
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 border-darkAccent/65 text-lightAccent"
+            />
+          </div>
 
           <div>
             <Button
               onClick={handleAuth}
               disabled={authenticating}
-              className="flex w-full justify-center rounded-md bg-primAccent px-3 py-1.5 text-sm/6 font-semibold text-lightAccent shadow-sm hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primAccent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg py-3 bg-gradient-to-r from-[#0398fc] to-[#00c6ff] text-lg font-semibold text-lightAccent shadow-md hover:shadow-lg hover:from-[#00a8f3] hover:to-[#009ecb] transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSignUp ? 'Sign Up' : 'Sign In'}
+              {authenticating ? "Processing..." : isSignUp ? 'Sign Up' : 'Sign In'}
             </Button>
           </div>
         </div>
 
-        <p onClick={() => setIsSignUp(!isSignUp)} className="mt-10 text-center text-sm/6 text-darkAccent hover:text-primAccent cursor-pointer transition duration-200">
+        <p
+          onClick={() => setIsSignUp(!isSignUp)}
+          className="mt-10 text-center text-sm text-lightAccent/80 hover:text-primAccent cursor-pointer transition-all duration-300"
+        >
           {isSignUp ? 'Already have an account? Sign In' : 'Don’t have an account? Sign Up'}
         </p>
-      </div>
-      {modalOpen && 
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <Card className="bg-primDark">
+      </motion.div>
+
+      {modalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <Card className="bg-[#1a1a1a] text-lightAccent shadow-lg p-6 rounded-xl max-w-sm">
             <CardHeader>
-              <CardTitle className="text-lightAccent/85">Success!</CardTitle>
-              <CardDescription className="text-lightAccent/60">Thank you for signing up with DevFusion!</CardDescription>
+              <CardTitle className="text-2xl text-primAccent">Success!</CardTitle>
+              <CardDescription className="text-lightAccent/70">Thank you for signing up with DevFusion!</CardDescription>
             </CardHeader>
             <CardContent>
               <p>Please check your email to verify your new account. Happy Collaborating!</p>
             </CardContent>
-            <CardFooter>
-              <Button onClick={handleSignUpRedirect}>Close</Button>
+            <CardFooter className="pt-6">
+              <Button
+                onClick={handleSignUpRedirect}
+              >
+                Close
+              </Button>
             </CardFooter>
           </Card>
         </div>
-      }
+      )}
     </div>
   );
 };
