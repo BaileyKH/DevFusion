@@ -162,13 +162,13 @@ const ProjectDashboard = () => {
               <ul role="list" className="flex flex-1 flex-col gap-y-7">
                 <li>
                 <ul role="list" className="mx-3 space-y-6">
-                  <li><NavLink to={`/dashboard`}><div className='project-nav-ico underline underline-offset-4 mb-16'><IconCaretLeft stroke={2} className="h-6 w-6 shrink-0"/>Dashboard</div></NavLink></li>
-                  <li><NavLink to={`/projects/${projectId}`} end><div className='project-nav-ico'><IconMessageDots stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Chat</div></NavLink></li>
-                  <li><NavLink to={`/projects/${projectId}/tasks`}><div className='project-nav-ico'><IconCheckbox stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Tasks</div></NavLink></li>
-                  <li><NavLink to={`/projects/${projectId}/changelog`}><div className='project-nav-ico'><IconBrandGithub stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Change Logs</div></NavLink></li>
+                  <li onClick={() => setSidebarOpen(false)}><NavLink to={`/dashboard`}><div className='project-nav-ico underline underline-offset-4 mb-16'><IconCaretLeft stroke={2} className="h-6 w-6 shrink-0"/>Dashboard</div></NavLink></li>
+                  <li onClick={() => setSidebarOpen(false)}><NavLink to={`/projects/${projectId}`} end><div className='project-nav-ico'><IconMessageDots stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Chat</div></NavLink></li>
+                  <li onClick={() => setSidebarOpen(false)}><NavLink to={`/projects/${projectId}/tasks`}><div className='project-nav-ico'><IconCheckbox stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Tasks</div></NavLink></li>
+                  <li onClick={() => setSidebarOpen(false)}><NavLink to={`/projects/${projectId}/changelog`}><div className='project-nav-ico'><IconBrandGithub stroke={2} className="h-6 w-6 shrink-0 mr-2"/>Change Logs</div></NavLink></li>
                   <div>
-                    <div className="h-full overflow-hidden px-4 sm:px-6 lg:px-8">
-                      <div className='flex'>
+                  <div className="h-full overflow-hidden mt-16 mb-12">
+                      <div className='flex items-center mb-4 nav-gradient pb-2'>
                         <IconUsers stroke={2} className="h-6 w-6 shrink-0 mr-2"/>
                         <h3 className="text-sm font-semibold tracking-wider">Project Members</h3>
                       </div>
@@ -179,14 +179,14 @@ const ProjectDashboard = () => {
                               <img
                                 src={member.users.avatar_url}
                                 alt="Avatar"
-                                className="h-8 w-8 rounded-full"
+                                className="h-6 w-6 rounded-full"
                               />
                             ) : (
-                              <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-lg">
+                              <div className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center text-lg text-primAccent">
                                 {member.users.username[0].toUpperCase()}
                               </div>
                             )}
-                            <span className="font-medium">{member.users.username}</span>
+                            <p className="font-medium text-white/85 text-sm">{member.users.username}</p>
                             {user?.id === projectOwnerId && member.user_id !== projectOwnerId && (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -195,20 +195,20 @@ const ProjectDashboard = () => {
                                     onClick={(e) => {
                                       e.stopPropagation(); 
                                     }}
-                                    className="ml-auto p-2 h-6 w-6 text-primAccent hover:text-red-500 transition duration-200"
+                                    className="ml-auto p-2 h-8 w-8 text-primAccent hover:text-red-500 transition duration-200 cursor-pointer"
                                   />
                                 </AlertDialogTrigger>
-                                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                <AlertDialogContent onClick={(e) => e.stopPropagation()} className='w-max'>
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                                    <AlertDialogTitle>Remove Member</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to remove "{member.username}"?
+                                      Are you sure you want to remove <span className='text-primAccent'>{member.users.username}</span>?
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel className='text-lightAccent'>Cancel</AlertDialogCancel>
                                     <AlertDialogAction onClick={() => handleRemoveMember(member.user_id)}>
-                                      Remove Member
+                                      Remove
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -222,7 +222,7 @@ const ProjectDashboard = () => {
                       {user?.id === projectOwnerId && (
                         <li><NavLink to={`/projects/${projectId}/add`}><div className='project-nav-ico text-xs bg-primAccent hover:bg-blue-800 border-none p-2 w-max rounded-md transition duration-300'><IconSquarePlus stroke={2} className="h-4 w-4 shrink-0 mr-2"/>Add Members</div></NavLink></li>
                       )}
-                    </div>
+                  </div>
                   </div>
                   </ul>
                 </li>
@@ -332,7 +332,7 @@ const ProjectDashboard = () => {
       </div>
     </div> 
 
-    <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
+    <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-primDark px-4 py-4 shadow-sm sm:px-6 lg:hidden">
       <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-white/85 lg:hidden">
         <span className="sr-only">Open sidebar</span>
         <IconMenu2 aria-hidden="true" className="h-6 w-6" />
