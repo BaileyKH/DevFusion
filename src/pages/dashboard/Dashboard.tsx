@@ -5,6 +5,7 @@ import { supabase } from '../../supabaseDB';
 import { NewProject } from '../../components/NewProject';
 import { ProjectCard } from '../../components/ProjectCard';
 
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast"
 
 const Dashboard = () => {
@@ -74,14 +75,14 @@ const Dashboard = () => {
 
   return (
     <div className="p-4 h-full">
-      <div className='flex justify-between items-center'>
-        <h1 className="text-2xl font-bold mb-4 text-lightAccent/85">Your Projects</h1>
-        <button
-          className="mb-4 p-2 bg-primAccent hover:bg-blue-800 transition duration-300 text-lightAccent rounded"
+      <div className='flex justify-between items-center mb-8'>
+        <h1 className="text-4xl font-extrabold text-primAccent">Your Projects</h1>
+        <Button
+          className="bg-gradient-to-r from-[#0398fc] to-[#00c6ff] px-6 py-3 text-lg font-semibold shadow-lg hover:scale-105 transform transition-transform duration-300"
           onClick={() => setIsModalOpen(true)}
         >
           New Project
-        </button>
+        </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-2">
         {projects.map((project) => (
