@@ -3,7 +3,7 @@ import { supabase } from '../supabaseDB';
 import { memo, useContext, useState } from 'react';
 import { UserContext } from '../App';
 
-import { IconTrash } from '@tabler/icons-react';
+import { IconTrash, IconGitBranch } from '@tabler/icons-react';
 
 import {
   Card,
@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { useToast } from "@/hooks/use-toast"
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface ProjectCardProps {
   project: any;
@@ -137,53 +139,71 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onDelete })
   };
 
   return (
-    <div
-      className="hover:scale-105 transform transition duration-300 cursor-pointer relative w-full"
+    <motion.div
+      className={cn(
+        "relative group overflow-hidden rounded-3xl transition-transform duration-500 cursor-pointer w-full",
+        "hover:shadow-[0px_30px_60px_rgba(0,0,0,0.5)]"
+      )}
       onClick={handleClick}
+      initial={{ scale: 0.95 }}
+      animate={{ scale: 1 }}
+      whileHover={{ scale: 1.05 }}
     >
-      <div className='rounded-lg w-full project-card-shadow'>
-        <Card className='w-full h-[250px] border-none'>
-          <CardHeader>
-            <CardTitle className='text-primAccent text-lg font-bold tracking-wide'>{project.name}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className='text-lightAccent/85'>{project.description}</p>
-          </CardContent>
-          <CardFooter>
-            {project.github_repo_url && (
-              <p className="text-lightAccent/60 mt-16">
-                <strong className='text-lightAccent/85'>Repo:</strong> {project.github_repo_url}
-              </p>
-            )}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <IconTrash
-                  stroke={1}
-                  onClick={(e) => {
-                    e.stopPropagation(); 
-                  }}
-                  className="absolute bottom-4 right-4 text-primAccent h-6 w-6 transition duration-300 hover:text-red-500"
-                />
-              </AlertDialogTrigger>
-              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Project</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete the project "{project.name}"? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className='text-lightAccent'>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-                    {isDeleting ? 'Deleting...' : 'Delete'}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-[#0398fc] to-[#00c6ff] opacity-40 z-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5 }}
+        transition={{ duration: 1 }}
+      />
+      <Card className="relative w-full h-[300px] overflow-hidden rounded-3xl z-10 bg-[#1a1a1a]/90 border border-primAccent/20 shadow-lg transition-transform duration-300 hover:shadow-xl">
+        <CardHeader className="p-6">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-3xl font-bold text-lightAccent">{project.name}</CardTitle>
+            <div className="flex items-center">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <IconTrash
+                    stroke={1.5}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="text-red-500 h-6 w-6 transition-transform transform hover:scale-110"
+                  />
+                </AlertDialogTrigger>
+                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-primAccent">Delete Project</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete the project "{project.name}"? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="text-lightAccent">Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                      {isDeleting ? 'Deleting...' : 'Delete'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="px-6">
+          <p className="text-lightAccent/85 leading-relaxed">{project.description}</p>
+        </CardContent>
+        {project.github_repo_url && (
+          <CardFooter className="p-6 mt-auto">
+            <IconGitBranch
+                  stroke={1.5}
+                  className="text-primAccent h-6 w-6 mr-2"
+            />
+            <p className="text-lightAccent/60">
+              <strong className="text-lightAccent/85">Repo:</strong> {project.github_repo_url}
+            </p>
           </CardFooter>
-        </Card>
-      </div>
-    </div>
+        )}
+      </Card>
+    </motion.div>
   );
 };
 
