@@ -4,7 +4,8 @@ import { UserContext } from '../App';
 import { useParams } from 'react-router-dom';
 
 import { IconPlus, IconUserCircle, IconTrash } from '@tabler/icons-react';
-
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 
@@ -126,60 +127,66 @@ const Tasks = () => {
   };
 
   return (
-    <div className='w-full h-screen'>
-      <div className="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3 xl:gap-x-8 my-10 min-h-[200px]">
+    <div className="w-full min-h-screen p-6 text-lightAccent">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10">
         {members.map((member) => (
-          <div key={member.id} className="overflow-hidden rounded-xl project-card-shadow">
-            <div className='flex flex-col justify-center bg-white/10 p-4 task-gradient'>
-              <div className='flex items-end mb-4 gap-x-4'>
-                {member.avatar_url ? (
-                  <img src={member.avatar_url} className="h-10 w-10 rounded-full"/> ) : (
-                  <IconUserCircle stroke={1} className="h-10 w-10 rounded-full"/>
-                )}
-                <h2 className="font-bold mb-2 text-lightAccent/85">{member.username}</h2>
-              </div>
+          <Card key={member.id} className="rounded-xl border border-lightAccent/10 bg-gradient-to-br from-primDark to-primDark/60 p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+            <CardHeader className="flex items-center mb-6">
+              {member.avatar_url ? (
+                <img src={member.avatar_url} alt={`${member.username}'s avatar`} className="h-12 w-12 rounded-full mr-4 shadow-md"/>
+              ) : (
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-gray-400 text-primAccent">
+                  <IconUserCircle size={32} />
+                </div>
+              )}
+              <CardTitle className="text-2xl font-bold text-lightAccent">{member.username}</CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
               {member.id === user.id && (
-                <form onSubmit={(e) => handleAddTask(e, member.id)} className='flex'>
+                <form onSubmit={(e) => handleAddTask(e, member.id)} className="flex items-center space-x-4">
                   <Input
                     type="text"
                     value={newTask}
                     onChange={(e) => setNewTask(e.target.value)}
-                    placeholder="New Task"
-                    className='w-64 placeholder:text-darkAccent/65 border-darkAccent/65'
+                    placeholder="Add new task"
+                    className="flex-grow text-lightAccent placeholder:text-darkAccent/70 border border-darkAccent/60"
                   />
-                  <button type="submit">
-                    <IconPlus stroke={2} className='text-primAccent w-[6] h-[6] ml-3 border border-primAccent rounded-md hover:bg-blue-200 transition-colors duration-200 ease-in'/>
-                  </button>
+                  <Button type="submit" variant="outline" className="p-2 hover:bg-primAccent hover:text-darkAccent transition-all">
+                    <IconPlus size={20} />
+                  </Button>
                 </form>
               )}
-            </div>
-            <ul className='bg-white/15 p-4 h-full'>
-              {tasks
-                .filter((task) => task.user_id === member.id)
-                .map((task) => (
-                  <li key={task.id} className="flex justify-between items-center mb-2">
-                    <div className='flex items-center'>
-                      <Checkbox
-                        onCheckedChange={() => handleToggleTask(task.id, task.is_completed)}
-                        checked={task.is_completed}
-                        disabled={task.user_id !== user.id}
-                      />
-                      <span className={`ml-2 text-lightAccent/85 ${task.is_completed ? 'line-through' : ''}`}>
-                        {task.description}
-                      </span>
-                    </div>
-                    {task.user_id === user.id && (
-                      <button
-                        className="ml-4 text-primAccent hover:text-red-500"
-                        onClick={() => handleDeleteTask(task.id)}
-                      >
-                        <IconTrash stroke={1} />
-                      </button>
-                    )}
-                  </li>
-                ))}
-            </ul>
-          </div>
+
+              <ul className="space-y-2 mt-6">
+                {tasks
+                  .filter((task) => task.user_id === member.id)
+                  .map((task) => (
+                    <li key={task.id} className="flex items-center justify-between p-2 bg-darkAccent/10 rounded-lg shadow-sm hover:bg-darkAccent/20 transition-colors duration-200">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          onCheckedChange={() => handleToggleTask(task.id, task.is_completed)}
+                          checked={task.is_completed}
+                          disabled={task.user_id !== user.id}
+                          className="text-primAccent"
+                        />
+                        <span className={`text-lightAccent ${task.is_completed ? 'line-through opacity-60' : ''}`}>
+                          {task.description}
+                        </span>
+                      </div>
+                      {task.user_id === user.id && (
+                        <button
+                          className="text-primAccent hover:text-red-500 transition-colors duration-200"
+                          onClick={() => handleDeleteTask(task.id)}
+                        >
+                          <IconTrash size={18} />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+              </ul>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
