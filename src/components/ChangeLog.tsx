@@ -7,13 +7,15 @@ import { useParams } from 'react-router-dom';
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import ShineBorder from "@/components/ui/shine-border";
+
+import { motion } from "framer-motion";
+import { IconGitCommit } from "@tabler/icons-react";
 
 const ChangeLog = () => {
   const { user } = useContext(UserContext);
@@ -65,44 +67,79 @@ const ChangeLog = () => {
   }, [githubRepoUrl]);
 
   return (
-    <div className="p-4 w-full h-screen">
-      <h1 className="text-2xl font-bold mb-4">Change Log</h1>
-      {commits.length === 0 ? (
-        <p>No commits found for this repository.</p>
-      ) : (
-        <div className='bg-primDark rounded-lg project-card-shadow'>
-          <ShineBorder borderWidth={1} color={'#0398fc'} className='w-full p-4'>
-          <Table>
-          <TableCaption>A list of the most recent change logs.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px] font-bold tracking-wider">User</TableHead>
-              <TableHead className='font-bold tracking-wider'>Date</TableHead>
-              <TableHead className='font-bold tracking-wider'>Commit</TableHead>
-              <TableHead className="text-right font-bold tracking-wider">View Commit</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {commits.map((commit: any, index: number) => (
-                <TableRow key={index} className='border-lightAccent/60'>
-                  <TableCell className='text-lightAccent/85'>{commit.commit.author.name}</TableCell>
-                  <TableCell className='text-lightAccent/85'>{new Date(commit.commit.author.date).toLocaleDateString()}</TableCell>
-                  <TableCell className='text-lightAccent/85'>{commit.commit.message}</TableCell>
-                  <TableCell className="text-right">        <a
-                  href={commit.html_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-lightAccent/85 hover:text-blue-800 underline underline-offset-4"
-                >
-                  View Commit
-                </a></TableCell>
-                </TableRow>
-            ))}
-          </TableBody>
-          </Table>
-          </ShineBorder>
-        </div>
-      )}
+    <div className="p-8 w-full min-h-screen">
+      <div className="max-w-6xl mx-auto">
+        <motion.h1
+          className="text-4xl font-bold text-lightAccent mb-8 text-center"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1 }}
+        >
+          Change Log
+        </motion.h1>
+        {commits.length === 0 ? (
+          <motion.div
+            className="flex flex-col items-center justify-center py-24"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            <IconGitCommit className="h-20 w-20 text-primAccent mb-4" />
+            <h2 className="text-2xl font-semibold text-lightAccent">
+              No commits found for this repository
+            </h2>
+            <p className="text-lightAccent/70 mt-2">
+              Make your first commit to get started!
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            className="bg-primDark/80 rounded-lg shadow-lg overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            <ShineBorder borderWidth={2} color={'#0398fc'} className="w-full">
+              <div className="p-6">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-darkAccent/40">
+                      <TableHead className="w-[150px] font-bold tracking-wider text-primAccent">User</TableHead>
+                      <TableHead className="font-bold tracking-wider text-primAccent">Date</TableHead>
+                      <TableHead className="font-bold tracking-wider text-primAccent px-10">Commit Message</TableHead>
+                      <TableHead className="text-right font-bold tracking-wider text-primAccent">View Commit</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {commits.map((commit: any, index: number) => (
+                      <motion.tr
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1, duration: 0.5 }}
+                        className="hover:bg-darkAccent/30 transition duration-200"
+                      >
+                        <TableCell className="text-lightAccent/85 py-4">{commit.commit.author.name}</TableCell>
+                        <TableCell className="text-lightAccent/85 py-4">{new Date(commit.commit.author.date).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-lightAccent/85 px-10 py-4">{commit.commit.message}</TableCell>
+                        <TableCell className="text-right py-4">
+                          <a
+                            href={commit.html_url}
+                            target="_blank"
+                            className="text-lightAccent/85 hover:text-primAccent transition duration-300 underline underline-offset-4"
+                          >
+                            View Commit
+                          </a>
+                        </TableCell>
+                      </motion.tr>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </ShineBorder>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 };
