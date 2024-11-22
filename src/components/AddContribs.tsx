@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { supabase } from '../supabaseDB';
 
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconSearch } from '@tabler/icons-react';
+
+import { motion } from "framer-motion";
 
 import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button';
@@ -72,70 +74,102 @@ interface AddContributorProps {
   };
 
   return (
-    <div className="mx-auto max-w-lg h-screen">
-      <div>
-        <div className="text-center">
-          <svg
-            fill="none"
-            stroke="#0398fc"
-            viewBox="0 0 48 48"
-            aria-hidden="true"
-            className="mx-auto h-12 w-12 text-gray-400"
-          >
-            <path
-              d="M34 40h10v-4a6 6 0 00-10.712-3.714M34 40H14m20 0v-4a9.971 9.971 0 00-.712-3.714M14 40H4v-4a6 6 0 0110.713-3.714M14 40v-4c0-1.313.253-2.566.713-3.714m0 0A10.003 10.003 0 0124 26c4.21 0 7.813 2.602 9.288 6.286M30 14a6 6 0 11-12 0 6 6 0 0112 0zm12 6a4 4 0 11-8 0 4 4 0 018 0zm-28 0a4 4 0 11-8 0 4 4 0 018 0z"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <h2 className="mt-2 text-base font-semibold text-lightAccent">Add team members</h2>
-          <p className="mt-1 text-sm text-darkAccent">
-            Add collaborators to your project. Teamwork makes the dream work!
-          </p>
-        </div>
-        <form className="mt-6 flex">
-          <Input
-            type="text"
-            placeholder="Search by username or email"
-            value={usernameOrEmail}
-            onChange={(e) => setUsernameOrEmail(e.target.value)}
-            className="w-full text-lightAccent shadow-sm ring-1 ring-inset border-darkAccent/65 ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm/6"
+    <div className="flex flex-col items-center justify-start min-h-screen pt-12 px-4">
+      <div className="text-center">
+        <motion.svg
+          fill="none"
+          stroke="#0398fc"
+          viewBox="0 0 48 48"
+          aria-hidden="true"
+          className="mx-auto h-14 w-14"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1 }}
+        >
+          <path
+            d="M34 40h10v-4a6 6 0 00-10.712-3.714M34 40H14m20 0v-4a9.971 9.971 0 00-.712-3.714M14 40H4v-4a6 6 0 0110.713-3.714M14 40v-4c0-1.313.253-2.566.713-3.714m0 0A10.003 10.003 0 0124 26c4.21 0 7.813 2.602 9.288 6.286M30 14a6 6 0 11-12 0 6 6 0 0112 0zm12 6a4 4 0 11-8 0 4 4 0 018 0zm-28 0a4 4 0 11-8 0 4 4 0 018 0z"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
-          <Button
-            onClick={handleSearch}
-            type='button'
-            className="ml-4 text-xs text-lightAccent tracking-wider px-2 transition duration-300 ease-in"
-          >
-            Search
-          </Button>
-        </form>
+        </motion.svg>
+        <motion.h2
+          className="mt-4 text-3xl font-bold text-lightAccent"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 1 }}
+        >
+          Add Team Members
+        </motion.h2>
+        <motion.p
+          className="mt-1 text-md text-lightAccent/80"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 1 }}
+        >
+          Add collaborators to your project. Teamwork makes the dream work!
+        </motion.p>
       </div>
-      <div className="mt-6">
-        <ul role="list" className="mt-4 divide-y divide-primAccent border-b border-t border-primAccent">
-              {searchResults.map((result) => (
-                <li key={result.id} className='flex items-center justify-between space-x-3 py-4'>
-                  <div className="flex min-w-0 flex-1 items-center space-x-3">
-                    <div className="shrink-0">
-                      {result.avatar_url ? (
-                        <img src={result.avatar_url} className="h-10 w-10 rounded-full"/>
-                      ) : (
-                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-300 text-lg text-primAccent">
-                          {result.username[0].toUpperCase()}
-                        </div>
-                      )}
+
+      <motion.form
+        className="mt-8 flex items-center w-full max-w-md"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 1 }}
+      >
+        <Input
+          type="text"
+          placeholder="Search by username or email"
+          value={usernameOrEmail}
+          onChange={(e) => setUsernameOrEmail(e.target.value)}
+          className="w-full px-4 py-3 text-lightAccent shadow-md border border-darkAccent/65 placeholder:text-gray-500 focus:ring-2 focus:ring-primAccent rounded-lg"
+        />
+        <Button
+          onClick={handleSearch}
+          type="button"
+          className="ml-4 px-4 py-3 bg-gradient-to-r from-[#0398fc] to-[#00c6ff] text-lightAccent shadow-md rounded-lg flex items-center gap-2 hover:shadow-lg transition duration-300"
+        >
+          <IconSearch stroke={1.5} className="w-5 h-5" />
+          Search
+        </Button>
+      </motion.form>
+
+      <div className="w-full max-w-md mt-10">
+        <ul role="list" className="divide-y divide-primAccent">
+          {searchResults.map((result) => (
+            <motion.li
+              key={result.id}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              className="flex items-center justify-between p-4 rounded-lg bg-[#1e1e1e] shadow-md hover:shadow-xl transition duration-300"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="shrink-0">
+                  {result.avatar_url ? (
+                    <img src={result.avatar_url} className="h-12 w-12 rounded-full shadow-md" />
+                  ) : (
+                    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-[#0398fc] text-lg text-lightAccent">
+                      {result.username[0].toUpperCase()}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-lightAccent">{result.username}</p>
-                    </div>
-                    <div className="shrink-0">
-                      <button className="inline-flex items-center gap-x-1.5 text-sm/6 font-semibold text-lightAccent" onClick={() => handleAddContributor(result.id)}><IconPlus stroke={2} className="h-5 w-5 text-lightAccent"/> Invite</button>
-                    </div>
-                  </div>
-                </li>
-              ))}
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="text-lightAccent font-medium">{result.username}</p>
+                  <p className="text-sm text-lightAccent/85">{result.email}</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => handleAddContributor(result.id)}
+                className="px-4 py-2 bg-gradient-to-r from-[#0398fc] to-[#00c6ff] text-lightAccent rounded-lg flex items-center gap-1 hover:shadow-md transition duration-300"
+              >
+                <IconPlus stroke={1.5} className="w-5 h-5" />
+                Invite
+              </Button>
+            </motion.li>
+          ))}
         </ul>
       </div>
     </div>
-  )
+  );
 };
