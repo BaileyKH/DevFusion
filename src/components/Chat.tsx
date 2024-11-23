@@ -26,6 +26,8 @@ export const Chat = () => {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesListRef = useRef<HTMLDivElement>(null);
+  const [mentionSuggestions, setMentionSuggestions] = useState<any[]>([]);
+  const [selectedMentionIndex, setSelectedMentionIndex] = useState<number>(-1);
 
   const normalizeMessageData = (message: any): ChatMessage => {
     if (Array.isArray(message.user)) {
@@ -77,7 +79,6 @@ export const Chat = () => {
   useEffect(() => {
     fetchMessages();
 
-    // Real-time subscription for new chat messages
     const channel = supabase
       .channel(`public:chat_messages_project_${projectId}`)
       .on(
@@ -127,7 +128,21 @@ export const Chat = () => {
     }
   }, [messages]);
 
-  // Code detection function
+  // Function to fetch project members for @mention suggestions
+  const fetchMembers = async (search: string) => {
+    const { data, error } = await supabase
+      .from('project_memberships')
+      .select('users:user_id (username, avatar_url)')
+      .ilike('users.username', `%${search}%`)
+      .eq('project_id', projectId);
+
+    if (error) {
+      console.error('Error fetching members for mentions:', error);
+    } else if (data) {
+      setMentionSuggestions(data.map((item) => item.users));
+    }
+  };
+
   const isProbablyCode = (text: string): boolean => {
     const hasMultipleLines = text.trim().includes('\n');
     const codeIndicators = ['{', '}', '=>', ';', 'function', 'const', 'let', 'var', 'class', 'import', '#include', 'def', 'if', 'else'];
@@ -154,16 +169,40 @@ export const Chat = () => {
     }
   };
 
-  // Handle key press in the textarea
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    } else if (e.key === '@') {
+
+      fetchMembers('');
+    } else if (mentionSuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        setSelectedMentionIndex((prev) => (prev + 1) % mentionSuggestions.length);
+      } else if (e.key === 'ArrowUp') {
+        setSelectedMentionIndex((prev) => (prev - 1 + mentionSuggestions.length) % mentionSuggestions.length);
+      } else if (e.key === 'Enter' && selectedMentionIndex >= 0) {
+        e.preventDefault();
+
+        const mention = mentionSuggestions[selectedMentionIndex];
+        setNewMessage((prev) => `${prev}@${mention.username} `);
+        setMentionSuggestions([]);
+        setSelectedMentionIndex(-1);
+      }
     }
+  };
+
+  const handleMentionClick = (mentionUsername: string) => {
+    setNewMessage((prev) => `${prev}${mentionUsername} `);
+    setMentionSuggestions([]);
+    setSelectedMentionIndex(-1);
   };
 
   // Regular expression to detect code blocks
   const codeBlockRegex = /```([\s\S]*?)```/g;
+
+  // Regular expression to detect mentions
+  const mentionRegex = /@(\w+)/g;
 
   return (
     <div className="w-full h-screen flex flex-col">
@@ -240,7 +279,23 @@ export const Chat = () => {
                         });
                       })()
                     ) : (
-                      <p>{message.content}</p>
+                      // Highlight mentions in text
+                      message.content.split(mentionRegex).map((part, index) => {
+                        if (index % 2 === 1) {
+                          const isMentionedUser = part === user.username;
+                          return (
+                            <span
+                              key={index}
+                              className={`${
+                                isMentionedUser ? 'text-lightAccent bg-yellow-400/30 p-1 rounded-md font-bold' : 'text-lightAccent bg-primAccent/50 p-1 rounded-md'
+                              }`}
+                            >
+                              @{part}
+                            </span>
+                          );
+                        }
+                        return <span key={index}>{part}</span>;
+                      })
                     )}
                   </div>
                 </div>
@@ -250,8 +305,7 @@ export const Chat = () => {
         })}
         <div ref={messagesEndRef} />
       </div>
-
-      <div className="flex-none">
+      <div className="flex-none relative">
         <form onSubmit={(e) => e.preventDefault()} className="border-t-2 border-darkAccent/65 flex items-center p-4">
           <textarea
             placeholder="Type your message..."
@@ -261,6 +315,23 @@ export const Chat = () => {
             className="flex-grow h-12 p-2 bg-transparent border border-darkAccent/65 rounded-md mr-4 placeholder:text-xs placeholder:text-darkAccent resize-none"
           />
         </form>
+        {mentionSuggestions.length > 0 && (
+          <div className="absolute bottom-16 left-4 w-full max-w-md bg-primDark rounded-md shadow-lg z-10">
+            <ul>
+              {mentionSuggestions.map((mention, index) => (
+                <li
+                  key={mention.username}
+                  onClick={() => handleMentionClick(mention.username)}
+                  className={`p-2 cursor-pointer hover:bg-primAccent/20 rounded-md ${
+                    index === selectedMentionIndex ? 'bg-primAccent/20 rounded-md' : ''
+                  }`}
+                >
+                  {mention.username}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
