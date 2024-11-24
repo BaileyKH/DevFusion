@@ -4,14 +4,6 @@ import { supabase } from '../supabaseDB';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import ShineBorder from "@/components/ui/shine-border";
 
 import { motion } from "framer-motion";
