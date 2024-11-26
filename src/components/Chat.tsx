@@ -128,7 +128,6 @@ export const Chat = () => {
     }
   }, [messages]);
 
-  // Function to fetch project members for @mention suggestions
   const fetchMembers = async (search: string) => {
     const { data, error } = await supabase
       .from('project_memberships')
@@ -174,7 +173,6 @@ export const Chat = () => {
       e.preventDefault();
       handleSendMessage();
     } else if (e.key === '@') {
-
       fetchMembers('');
     } else if (mentionSuggestions.length > 0) {
       if (e.key === 'ArrowDown') {
@@ -183,7 +181,6 @@ export const Chat = () => {
         setSelectedMentionIndex((prev) => (prev - 1 + mentionSuggestions.length) % mentionSuggestions.length);
       } else if (e.key === 'Enter' && selectedMentionIndex >= 0) {
         e.preventDefault();
-
         const mention = mentionSuggestions[selectedMentionIndex];
         setNewMessage((prev) => `${prev}@${mention.username} `);
         setMentionSuggestions([]);
@@ -198,19 +195,13 @@ export const Chat = () => {
     setSelectedMentionIndex(-1);
   };
 
-  // Regular expression to detect code blocks
   const codeBlockRegex = /```([\s\S]*?)```/g;
-
-  // Regular expression to detect mentions
   const mentionRegex = /@(\w+)/g;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <div
-        className="flex-grow overflow-y-auto p-4 space-y-4"
-        ref={messagesListRef}
-        onScroll={handleScroll}
-      >
+      <div className="flex-grow overflow-y-auto p-4 space-y-4" ref={messagesListRef} onScroll={handleScroll}>
         {messages.map((message) => {
           const messageUser = Array.isArray(message.user) ? message.user[0] : message.user;
           const hasCodeBlock = codeBlockRegex.test(message.content);
@@ -250,12 +241,7 @@ export const Chat = () => {
                       })}
                     </small>
                   </div>
-                  <div
-                    style={{
-                      wordBreak: 'break-word',
-                      overflowWrap: 'break-word',
-                    }}
-                  >
+                  <div style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                     {hasCodeBlock ? (
                       (() => {
                         codeBlockRegex.lastIndex = 0;
@@ -279,7 +265,7 @@ export const Chat = () => {
                         });
                       })()
                     ) : (
-                      // Highlight mentions in text
+                      // Highlight mentions and URLs in text
                       message.content.split(mentionRegex).map((part, index) => {
                         if (index % 2 === 1) {
                           const isMentionedUser = part === user.username;
@@ -287,14 +273,31 @@ export const Chat = () => {
                             <span
                               key={index}
                               className={`${
-                                isMentionedUser ? 'text-lightAccent bg-yellow-400/30 p-1 rounded-md font-bold' : 'text-lightAccent bg-primAccent/50 p-1 rounded-md'
+                                isMentionedUser
+                                  ? 'text-lightAccent bg-yellow-400/30 p-1 rounded-md font-bold'
+                                  : 'text-lightAccent bg-primAccent/50 p-1 rounded-md'
                               }`}
                             >
                               @{part}
                             </span>
                           );
                         }
-                        return <span key={index}>{part}</span>;
+                        return part.split(urlRegex).map((subPart, subIndex) => {
+                          if (urlRegex.test(subPart)) {
+                            return (
+                              <a
+                                key={`${index}-${subIndex}`}
+                                href={subPart}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primAccent underline underline-offset-4 hover:text-blue-800 transition-colors duration-200 ease-in"
+                              >
+                                {subPart}
+                              </a>
+                            );
+                          }
+                          return <span key={`${index}-${subIndex}`}>{subPart}</span>;
+                        });
                       })
                     )}
                   </div>
