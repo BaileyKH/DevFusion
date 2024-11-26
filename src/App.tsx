@@ -46,7 +46,7 @@ function App() {
         if (session) {
           const { data: userProfile, error: userError } = await supabase
             .from('users')
-            .select('username, email, avatar_url, display_color, github_token, notification_enabled') 
+            .select('username, email, avatar_url, display_color, github_token') 
             .eq('id', session.user.id)
             .single();
 
