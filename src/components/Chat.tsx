@@ -6,6 +6,10 @@ import { useParams } from 'react-router-dom';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atelierCaveDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
+import { IconPaperclip } from '@tabler/icons-react';
+
+import { Button } from "@/components/ui/button";
+
 interface ChatMessage {
   id: string;
   user_id: string;
@@ -16,6 +20,16 @@ interface ChatMessage {
     avatar_url?: string;
     display_color?: string;
   };
+  files?: ChatFile[];
+  status?: 'sending' | 'sent' | 'failed';
+}
+
+interface ChatFile {
+  id?: string;
+  file_name: string;
+  file_url?: string;
+  file_type: string;
+  status: 'uploading' | 'uploaded' | 'failed';
 }
 
 export const Chat = () => {
@@ -28,6 +42,8 @@ export const Chat = () => {
   const messagesListRef = useRef<HTMLDivElement>(null);
   const [mentionSuggestions, setMentionSuggestions] = useState<any[]>([]);
   const [selectedMentionIndex, setSelectedMentionIndex] = useState<number>(-1);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const normalizeMessageData = (message: any): ChatMessage => {
     if (Array.isArray(message.user)) {
@@ -48,6 +64,12 @@ export const Chat = () => {
           username,
           avatar_url,
           display_color
+        ),
+        files:chat_files (
+          id,
+          file_name,
+          file_url,
+          file_type
         )
       `)
       .eq('project_id', projectId)
@@ -79,7 +101,7 @@ export const Chat = () => {
   useEffect(() => {
     fetchMessages();
 
-    const channel = supabase
+    const messagesChannel = supabase
       .channel(`public:chat_messages_project_${projectId}`)
       .on(
         'postgres_changes',
@@ -89,36 +111,27 @@ export const Chat = () => {
           table: 'chat_messages',
           filter: `project_id=eq.${projectId}`,
         },
-        async (payload: { eventType: string; new: any; old: any }) => {
-          const { data: newMessageData } = await supabase
-            .from('chat_messages')
-            .select(`
-              id,
-              user_id,
-              content,
-              created_at,
-              user:user_id (
-                username,
-                avatar_url,
-                display_color
-              )
-            `)
-            .eq('id', payload.new.id)
-            .single();
+        handleNewMessage
+      )
+      .subscribe();
 
-          if (newMessageData) {
-            const normalizedMessage = normalizeMessageData(newMessageData);
-            setMessages((prevMessages) => [...prevMessages, normalizedMessage]);
-            if (isAtBottom) {
-              scrollToBottom();
-            }
-          }
-        }
+    const filesChannel = supabase
+      .channel(`public:chat_files_project_${projectId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_files',
+          filter: `project_id=eq.${projectId}`,
+        },
+        handleNewFile
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(filesChannel);
     };
   }, [projectId]);
 
@@ -128,6 +141,77 @@ export const Chat = () => {
     }
   }, [messages]);
 
+  const updateMessageId = (tempId: string, realId: string) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) =>
+        msg.id === tempId ? { ...msg, id: realId } : msg
+      )
+    );
+  };
+
+  // Handle new messages from realtime subscription
+  const handleNewMessage = async (payload: { eventType: string; new: any; old: any }) => {
+    const messageId = payload.new.id;
+
+    const messageExists = messages.some((msg) => msg.id === messageId);
+    if (messageExists) {
+      return;
+    }
+
+    const { data: newMessageData } = await supabase
+      .from('chat_messages')
+      .select(`
+        id,
+        user_id,
+        content,
+        created_at,
+        user:user_id (
+          username,
+          avatar_url,
+          display_color
+        ),
+        files:chat_files (
+          id,
+          file_name,
+          file_url,
+          file_type
+        )
+      `)
+      .eq('id', messageId)
+      .single();
+
+    if (newMessageData) {
+      const normalizedMessage = normalizeMessageData(newMessageData);
+      setMessages((prevMessages) => [...prevMessages, normalizedMessage]);
+    }
+
+    if (isAtBottom) {
+      scrollToBottom();
+    }
+  };
+
+  // Handle new files from realtime subscription
+  const handleNewFile = async (payload: { eventType: string; new: any; old: any }) => {
+    const newFile = payload.new;
+
+    setMessages((prevMessages) =>
+      prevMessages.map((message) => {
+        if (message.id === newFile.message_id) {
+          const updatedFiles = message.files
+            ? message.files.map((file) =>
+                file.file_name === newFile.file_name
+                  ? { ...file, ...newFile, status: 'uploaded' }
+                  : file
+              )
+            : [{ ...newFile, status: 'uploaded' }];
+          return { ...message, files: updatedFiles };
+        }
+        return message;
+      })
+    );
+  };
+
+  // Function to fetch project members for @mention suggestions
   const fetchMembers = async (search: string) => {
     const { data, error } = await supabase
       .from('project_memberships')
@@ -144,27 +228,155 @@ export const Chat = () => {
 
   const isProbablyCode = (text: string): boolean => {
     const hasMultipleLines = text.trim().includes('\n');
-    const codeIndicators = ['{', '}', '=>', ';', 'function', 'const', 'let', 'var', 'class', 'import', '#include', 'def', 'if', 'else'];
+    const codeIndicators = [
+      '{', '}', '=>', ';', 'function', 'const', 'let', 'var', 'class', 'import', '#include', 'def', 'if', 'else'
+    ];
     const containsCodeIndicators = codeIndicators.some((indicator) => text.includes(indicator));
     return hasMultipleLines && containsCodeIndicators;
   };
 
   const handleSendMessage = async () => {
-    if (newMessage.trim() === '') return;
+    if (newMessage.trim() === '' && selectedFiles.length === 0) return;
 
-    const content = isProbablyCode(newMessage) ? `\`\`\`\n${newMessage.trim()}\n\`\`\`` : newMessage.trim();
+    const content = isProbablyCode(newMessage)
+      ? `\`\`\`\n${newMessage.trim()}\n\`\`\``
+      : newMessage.trim();
 
-    const { error } = await supabase.from('chat_messages').insert({
-      project_id: projectId,
-      user_id: user.id,
-      content,
-    });
+    const filesToUpload = [...selectedFiles];
 
-    if (error) {
-      console.error('Error sending message:', error);
+    setNewMessage('');
+    setSelectedFiles([]);
+    setIsAtBottom(true);
+
+    if (filesToUpload.length > 0) {
+      const tempMessageId = `temp-${Date.now()}-${Math.random()}`;
+
+      const tempMessage: ChatMessage = {
+        id: tempMessageId,
+        user_id: user.id,
+        content,
+        created_at: new Date().toISOString(),
+        user: {
+          username: user.username,
+          avatar_url: user.avatar_url,
+          display_color: user.display_color,
+        },
+        files: filesToUpload.map((file) => ({
+          file_name: file.name,
+          file_type: file.type,
+          status: 'uploading',
+        })),
+        status: 'sending',
+      };
+
+      setMessages((prevMessages) => [...prevMessages, tempMessage]);
+
+      try {
+        const { data: messageData, error: messageError } = await supabase
+          .from('chat_messages')
+          .insert({
+            project_id: projectId,
+            user_id: user.id,
+            content,
+          })
+          .select()
+          .single();
+
+        if (messageError) throw messageError;
+
+        updateMessageId(tempMessageId, messageData.id);
+
+        for (const file of tempMessage.files || []) {
+          const originalFile = filesToUpload.find(
+            (f) => f.name === file.file_name && f.type === file.file_type
+          );
+          if (originalFile) {
+            await uploadFile(originalFile, messageData.id);
+          }
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        updateMessageStatus(tempMessageId, 'failed');
+      }
     } else {
-      setNewMessage('');
-      setIsAtBottom(true);
+      try {
+        await supabase.from('chat_messages').insert({
+          project_id: projectId,
+          user_id: user.id,
+          content,
+        });
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+  };
+
+  const updateMessageStatus = (messageId: string, status: 'sending' | 'sent' | 'failed') => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) =>
+        msg.id === messageId ? { ...msg, status } : msg
+      )
+    );
+  };
+
+  const updateFileInMessage = (
+    messageId: string,
+    fileName: string,
+    updates: Partial<ChatFile>
+  ) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) => {
+        if (msg.id === messageId && msg.files) {
+          const updatedFiles = msg.files.map((file) =>
+            file.file_name === fileName ? { ...file, ...updates } : file
+          );
+          return { ...msg, files: updatedFiles };
+        }
+        return msg;
+      })
+    );
+  };
+
+  const uploadFile = async (file: File, messageId: string) => {
+    const sanitizedFileName = file.name.replace(/\s+/g, '_').replace(/[^\w.-]/g, '');
+    const filePath = `${projectId}/${user.id}/${Date.now()}_${sanitizedFileName}`;
+
+    try {
+      const { data: storageData, error: storageError } = await supabase.storage
+        .from('chat_files')
+        .upload(filePath, file);
+
+      if (storageError) throw storageError;
+
+      const { data: publicURLData } = supabase.storage
+        .from('chat_files')
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicURLData.publicUrl;
+
+      const { data: fileData, error: fileInsertError } = await supabase
+        .from('chat_files')
+        .insert({
+          message_id: messageId,
+          project_id: projectId,
+          user_id: user.id,
+          file_name: file.name,
+          file_url: publicUrl,
+          file_type: file.type,
+        })
+        .select()
+        .single();
+
+      if (fileInsertError) throw fileInsertError;
+
+      updateFileInMessage(messageId, file.name, {
+        id: fileData.id,
+        file_url: publicUrl,
+        status: 'uploaded',
+      });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      updateFileInMessage(messageId, file.name, { status: 'failed' });
     }
   };
 
@@ -190,22 +402,33 @@ export const Chat = () => {
   };
 
   const handleMentionClick = (mentionUsername: string) => {
-    setNewMessage((prev) => `${prev}${mentionUsername} `);
+    setNewMessage((prev) => `${prev}@${mentionUsername} `);
     setMentionSuggestions([]);
     setSelectedMentionIndex(-1);
   };
 
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  // Regular expressions for parsing message content
   const codeBlockRegex = /```([\s\S]*?)```/g;
   const mentionRegex = /@(\w+)/g;
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <div className="flex-grow overflow-y-auto p-4 space-y-4" ref={messagesListRef} onScroll={handleScroll}>
+      <div
+        className="flex-grow overflow-y-auto p-4 space-y-4"
+        ref={messagesListRef}
+        onScroll={handleScroll}
+      >
         {messages.map((message) => {
           const messageUser = Array.isArray(message.user) ? message.user[0] : message.user;
           const hasCodeBlock = codeBlockRegex.test(message.content);
           const userColor = messageUser.display_color || '#FFFFFF';
+          const files = message.files || [];
+          const messageStatus = message.status || 'sent';
 
           return (
             <div
@@ -214,6 +437,7 @@ export const Chat = () => {
               style={{
                 wordBreak: 'break-word',
                 overflowWrap: 'break-word',
+                opacity: messageStatus === 'failed' ? 0.5 : 1,
               }}
             >
               <div className="flex gap-x-4 items-start">
@@ -240,6 +464,12 @@ export const Chat = () => {
                         hour12: true,
                       })}
                     </small>
+                    {messageStatus === 'sending' && (
+                      <span className="text-sm text-gray-500 ml-2">Sending...</span>
+                    )}
+                    {messageStatus === 'failed' && (
+                      <span className="text-sm text-red-500 ml-2">Failed to send</span>
+                    )}
                   </div>
                   <div style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                     {hasCodeBlock ? (
@@ -265,7 +495,6 @@ export const Chat = () => {
                         });
                       })()
                     ) : (
-                      // Highlight mentions and URLs in text
                       message.content.split(mentionRegex).map((part, index) => {
                         if (index % 2 === 1) {
                           const isMentionedUser = part === user.username;
@@ -301,6 +530,42 @@ export const Chat = () => {
                       })
                     )}
                   </div>
+                  {files.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      {files.map((file) => {
+                        const isImage = file.file_type && file.file_type.startsWith('image/');
+                        const isUploading = file.status === 'uploading';
+                        const uploadFailed = file.status === 'failed';
+
+                        return (
+                          <div key={file.id || file.file_name} className="flex items-center">
+                            {isImage && file.file_url && !isUploading && !uploadFailed ? (
+                              <img
+                                src={file.file_url}
+                                alt={file.file_name}
+                                className="max-w-xs rounded-md"
+                              />
+                            ) : (
+                              <a
+                                href={file.file_url || '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primAccent underline hover:text-blue-800 transition-colors duration-200 ease-in"
+                              >
+                                {file.file_name}
+                              </a>
+                            )}
+                            {isUploading && (
+                              <span className="ml-2 text-sm text-gray-500">Uploading...</span>
+                            )}
+                            {uploadFailed && (
+                              <span className="ml-2 text-sm text-red-500">Failed to upload</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -309,15 +574,60 @@ export const Chat = () => {
         <div ref={messagesEndRef} />
       </div>
       <div className="flex-none relative">
-        <form onSubmit={(e) => e.preventDefault()} className="border-t-2 border-darkAccent/65 flex items-center p-4">
+        <form onSubmit={(e) => e.preventDefault()} className="border-t-2 border-darkAccent/65 flex items-center py-4">
           <textarea
             placeholder="Type your message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyPress}
-            className="flex-grow h-12 p-2 bg-transparent border border-darkAccent/65 rounded-md mr-4 placeholder:text-xs placeholder:text-darkAccent resize-none"
+            className="flex-grow h-14 p-2 bg-transparent border border-darkAccent/65 rounded-md mr-4 placeholder:text-xs placeholder:text-darkAccent resize-none"
           />
+          <div className="flex items-center rounded-md border border-darkAccent/65 p-2">
+            <input
+              type="file"
+              multiple
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const files = e.target.files ? Array.from(e.target.files) : [];
+                setSelectedFiles(files);
+              }}
+            />
+            <Button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="mr-2 bg-primDark transition duration-200"
+            >
+              <IconPaperclip className="text-primAccent" />
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSendMessage}
+              className="bg-primDark text-primAccent text-xs transition duration-200"
+            >
+              Send
+            </Button>
+          </div>
         </form>
+        {selectedFiles.length > 0 && (
+          <div className="flex items-center py-2">
+            <p className="font-bold mr-2">Selected Files:</p>
+            <ul className="list-disc list-inside">
+              {selectedFiles.map((file, index) => (
+                <li key={index} className="flex items-center">
+                  <span>{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(index)}
+                    className="ml-2 text-red-500 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {mentionSuggestions.length > 0 && (
           <div className="absolute bottom-16 left-4 w-full max-w-md bg-primDark rounded-md shadow-lg z-10">
             <ul>
