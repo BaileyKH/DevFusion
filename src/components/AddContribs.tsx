@@ -156,7 +156,6 @@ interface AddContributorProps {
                 </div>
                 <div className="flex-1">
                   <p className="text-lightAccent font-medium">{result.username}</p>
-                  <p className="text-sm text-lightAccent/85">{result.email}</p>
                 </div>
               </div>
               <Button
