@@ -1,4 +1,4 @@
 # DevFusion
 ## Where Development meets Collaboration
 
-(In Progress)
+(Release Date: 12/1)
