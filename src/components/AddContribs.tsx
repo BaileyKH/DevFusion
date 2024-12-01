@@ -1,19 +1,19 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { UserContext } from '../App';
 import { supabase } from '../supabaseDB';
 
 import { IconPlus, IconSearch } from '@tabler/icons-react';
-
 import { motion } from "framer-motion";
-
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast";
 
 interface AddContributorProps {
     projectId: string;
-  }
+}
 
-  export const AddContribs = ({ projectId }: AddContributorProps) => {
+export const AddContribs = ({ projectId }: AddContributorProps) => {
+  const { user } = useContext(UserContext);
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const { toast } = useToast();
@@ -23,7 +23,7 @@ interface AddContributorProps {
       .from('users')
       .select('id, username, email, avatar_url')
       .or(`username.ilike.%${usernameOrEmail}%,email.ilike.%${usernameOrEmail}%`);
-  
+
     if (error) {
       toast({
         title: "Error",
@@ -35,15 +35,31 @@ interface AddContributorProps {
       setSearchResults(data || []);
     }
   };
-  
-  const handleAddContributor = async (userId: string) => {
+
+  const handleInviteContributor = async (userId: string) => {
+    const { data: existingInvite } = await supabase
+      .from('project_invitations')
+      .select('id')
+      .eq('project_id', projectId)
+      .eq('invitee_id', userId)
+      .single();
+
+    if (existingInvite) {
+      toast({
+        title: "Error",
+        description: "User is already invited",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { data: existingMembership } = await supabase
       .from('project_memberships')
       .select('id')
       .eq('project_id', projectId)
       .eq('user_id', userId)
       .single();
-  
+
     if (existingMembership) {
       toast({
         title: "Error",
@@ -53,22 +69,23 @@ interface AddContributorProps {
       return;
     }
 
-    const { error } = await supabase.from('project_memberships').insert({
+    const { error } = await supabase.from('project_invitations').insert({
       project_id: projectId,
-      user_id: userId,
+      invitee_id: userId,
+      inviter_id: user.id,
     });
-  
+
     if (error) {
       toast({
         title: "Error",
-        description: "Error adding contributor",
+        description: "Error sending invitation",
         variant: "destructive",
       });
       return;
     } else {
       toast({
         title: "Success",
-        description: "Contributor added successfully!",
+        description: "Invitation sent successfully!",
       });
     }
   };
@@ -159,7 +176,7 @@ interface AddContributorProps {
                 </div>
               </div>
               <Button
-                onClick={() => handleAddContributor(result.id)}
+                onClick={() => handleInviteContributor(result.id)}
                 className="px-4 py-2 bg-gradient-to-r from-[#0398fc] to-[#00c6ff] text-lightAccent rounded-lg flex items-center gap-1 hover:shadow-md transition duration-300"
               >
                 <IconPlus stroke={1.5} className="w-5 h-5" />
