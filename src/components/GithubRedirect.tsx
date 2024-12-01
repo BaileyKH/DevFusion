@@ -26,7 +26,6 @@ export const GithubRedirect = () => {
                     if (error) {
                         console.error("Error saving GitHub token:", error);
                     } else {
-                        // Fetch updated user data
                         const { data: updatedUser, error: fetchError } =
                             await supabase
                                 .from("users")

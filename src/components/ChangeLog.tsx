@@ -36,7 +36,7 @@ const ChangeLog = () => {
 
         try {
             const response = await axios.get(
-                "https://defusion-be.onrender.com",
+                "https://defusion-be.onrender.com/api/github/commits",
                 {
                     params: {
                         repoUrl: githubRepoUrl,
