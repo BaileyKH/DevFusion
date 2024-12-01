@@ -444,7 +444,7 @@ export const Chat = () => {
                 {messageUser.avatar_url ? (
                   <img
                     src={messageUser.avatar_url}
-                    alt="Avatar"
+                    alt="User Avatar"
                     className="h-10 w-10 rounded-full"
                   />
                 ) : (
