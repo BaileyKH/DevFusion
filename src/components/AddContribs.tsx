@@ -164,7 +164,7 @@ export const AddContribs = ({ projectId }: AddContributorProps) => {
               <div className="flex items-center space-x-4">
                 <div className="shrink-0">
                   {result.avatar_url ? (
-                    <img src={result.avatar_url} className="h-12 w-12 rounded-full shadow-md" />
+                    <img src={result.avatar_url} alt='users profile picture' className="h-12 w-12 rounded-full shadow-md" />
                   ) : (
                     <div className="flex items-center justify-center h-12 w-12 rounded-full bg-[#0398fc] text-lg text-lightAccent">
                       {result.username[0].toUpperCase()}
