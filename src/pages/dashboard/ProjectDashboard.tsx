@@ -667,12 +667,25 @@ const ProjectDashboard = () => {
                     Dashboard
                 </div>
                 <span className="sr-only">Your profile</span>
-                <img
-                    src={user.avatar_url}
-                    alt="User Avatar"
-                    className="h-8 w-8 rounded-full"
-                    onClick={() => setIsUserModalOpen(true)}
-                />
+                {user && user.avatar_url ? (
+                                        <img
+                                            src={user.avatar_url}
+                                            alt="User Avatar"
+                                            className="h-8 w-8 rounded-full cursor-pointer border border-darkAccent"
+                                            onClick={() =>
+                                                setIsUserModalOpen(true)
+                                            }
+                                        />
+                                    ) : (
+                                        <div
+                                            onClick={() =>
+                                                setIsUserModalOpen(true)
+                                            }
+                                            className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-lg cursor-pointer text-primAccent"
+                                        >
+                                            {user.username[0].toUpperCase()}
+                                        </div>
+                                    )}
                 {isUserModalOpen && (
                     <ProfileModal
                         isOpen={isUserModalOpen}

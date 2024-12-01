@@ -38,10 +38,10 @@ export const Nav = () => {
                                     <img
                                         src={user.avatar_url}
                                         alt="User Avatar"
-                                        className="h-12 w-12 rounded-full border border-primAccent shadow-md"
+                                        className="h-12 w-12 rounded-full border border-primAccent shadow-md cursor-pointer"
                                     />
                                 ) : (
-                                    <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center text-lg text-primAccent border border-primAccent">
+                                    <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center text-lg cursor-pointer text-primAccent border border-primAccent">
                                         {user.username[0].toUpperCase()}
                                     </div>
                                 )}
@@ -59,8 +59,6 @@ export const Nav = () => {
                     )}
                 </div>
             </nav>
-
-            {/* Profile Modal */}
             {isUserModalOpen && (
                 <ProfileModal
                     isOpen={isUserModalOpen}
