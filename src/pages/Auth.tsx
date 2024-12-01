@@ -42,7 +42,7 @@ export const Auth = () => {
         checkSession();
 
         const { data: authListener } = supabase.auth.onAuthStateChange(
-            (session) => {
+            (_event, session) => {
                 if (session) {
                     navigate("/dashboard");
                 }
@@ -59,7 +59,6 @@ export const Auth = () => {
         setError("");
 
         if (isSignUp) {
-            // Check for existing usernames to prevent duplicates
             const { data: existingUsernames, error: usernameError } =
                 await supabase
                     .from("users")
@@ -89,7 +88,7 @@ export const Auth = () => {
             });
 
             if (error) {
-                alert(error.message);
+                setError(error.message);
             } else {
                 setModalOpen(true);
             }
@@ -98,6 +97,7 @@ export const Auth = () => {
                 email,
                 password,
             });
+
             if (error) {
                 setError("Incorrect Username or Password, please try again.");
             }
@@ -139,7 +139,6 @@ export const Auth = () => {
                         <p className="text-sm text-red-500 mt-2">{error}</p>
                     )}
                 </div>
-
                 <div className="space-y-6">
                     {isSignUp && (
                         <div>
@@ -158,7 +157,6 @@ export const Auth = () => {
                             />
                         </div>
                     )}
-
                     <div>
                         <Label
                             htmlFor="email"
@@ -175,7 +173,6 @@ export const Auth = () => {
                             className="mt-1 border-darkAccent/65 text-lightAccent"
                         />
                     </div>
-
                     <div>
                         <Label
                             htmlFor="password"
@@ -192,7 +189,6 @@ export const Auth = () => {
                             className="mt-1 border-darkAccent/65 text-lightAccent"
                         />
                     </div>
-
                     <div>
                         <Button
                             onClick={handleAuth}
@@ -217,7 +213,6 @@ export const Auth = () => {
                         : "Don’t have an account? Sign Up"}
                 </p>
             </motion.div>
-
             {modalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
                     <Card className="bg-[#1a1a1a] text-lightAccent shadow-lg p-6 rounded-xl max-w-sm">

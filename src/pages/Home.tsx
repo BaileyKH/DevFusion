@@ -125,8 +125,6 @@ export const Home = () => {
                         </BoxReveal>
                     </div>
                 </div>
-
-                {/* Image Section */}
                 <div className="w-full md:w-1/2 flex justify-center md:justify-start items-center relative">
                     <motion.div
                         className="absolute -top-16 -left-16 md:-top-32 md:-left-24 h-[200px] w-[200px] md:h-[300px] md:w-[300px] rounded-full bg-gradient-to-br from-[#00c6ff] to-[#0398fc] blur-2xl md:blur-3xl opacity-40"
