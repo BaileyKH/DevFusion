@@ -3,7 +3,6 @@ import { UserContext } from '../App';
 import { supabase } from '../supabaseDB';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-
 import ShineBorder from "@/components/ui/shine-border";
 
 import { motion } from "framer-motion";
