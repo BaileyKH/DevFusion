@@ -57,99 +57,96 @@ export const Home = () => {
 
     return (
         <main className="">
-            <section className="relative flex flex-col md:flex-row h-auto md:h-screen w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[#121212] to-[#0d0d0d] text-lightAccent gap-y-8 md:gap-x-14 p-6 md:p-0">
-                {/* Text Section */}
-                <div className="w-full md:w-1/2 flex justify-end items-center mb-8 md:mb-0">
-                    <div className="h-full w-full max-w-[36rem] items-center justify-center overflow-hidden pt-8 md:pt-0 z-10">
-                        <BoxReveal boxColor={"#0398fc"} duration={1}>
-                            <motion.p
-                                className="text-5xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0398fc] to-[#00c6ff] neon-shadow"
-                                initial={{ y: -20, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 1 }}
-                            >
-                                DevFusion
-                            </motion.p>
-                        </BoxReveal>
-                        <BoxReveal boxColor={"#0398fc"} duration={1}>
-                            <motion.h2
-                                className="mt-4 md:mt-6 text-xl md:text-2xl text-lightAccent/90 tracking-wider leading-tight"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 1, duration: 1 }}
-                            >
-                                Empowering seamless teamwork and effortless
-                                project management.
-                            </motion.h2>
-                        </BoxReveal>
-                        <BoxReveal boxColor={"#0398fc"} duration={1}>
-                            <motion.div
-                                className="mt-8 md:mt-12 space-y-4 text-lightAccent text-md md:text-lg leading-relaxed tracking-wide"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 1.5, duration: 1 }}
-                            >
-                                <div className="flex items-center justify-start gap-2">
-                                    <span className="text-primAccent">
-                                        <IconArrowRight />
-                                    </span>
-                                    Real-time chat with smart code detection.
-                                </div>
-                                <div className="flex items-center justify-start gap-2">
-                                    <span className="text-primAccent">
-                                        <IconArrowRight />
-                                    </span>
-                                    Transparent task management for easy
-                                    tracking.
-                                </div>
-                                <div className="flex items-center justify-start gap-2">
-                                    <span className="text-primAccent">
-                                        <IconArrowRight />
-                                    </span>
-                                    Integrated GitHub collaboration.
-                                </div>
-                            </motion.div>
-                        </BoxReveal>
-                        <BoxReveal boxColor={"#0398fc"} duration={0.5}>
-                            <Link to="/auth">
-                                <motion.div
-                                    initial={{ scale: 0.9, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    transition={{ delay: 2, duration: 0.5 }}
-                                >
-                                    <Button className="mt-8 md:mt-12 py-4 md:py-6 px-8 md:px-12 bg-gradient-to-r from-[#0398fc] to-[#00c6ff] text-md md:text-lg tracking-wider shadow-lg transform hover:shadow-primAccent hover:bg-gradient-to-r hover:from-[#00c6ff] hover:to-[#0398fc] transition-all duration-300">
-                                        Get Started
-                                    </Button>
-                                </motion.div>
-                            </Link>
-                        </BoxReveal>
+            <section className="relative flex flex-col h-auto lg:h-screen w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[#121212] to-[#0d0d0d] text-lightAccent gap-y-8 lg:gap-x-14 p-6 lg:p-0">
+                <div className="w-full lg:w-full flex justify-center items-center mb-8 lg:mb-0">
+                    <div className="h-full w-full max-w-[36rem] items-center justify-center overflow-hidden pt-8 lg:pt-0 z-10">
+                    <BoxReveal boxColor={"#0398fc"} duration={1}>
+                        <motion.p
+                        className="text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0398fc] to-[#00c6ff] neon-shadow"
+                        initial={{ y: -20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 1 }}
+                        >
+                        DevFusion
+                        </motion.p>
+                    </BoxReveal>
+                    <BoxReveal boxColor={"#0398fc"} duration={1}>
+                        <motion.h2
+                        className="mt-4 lg:mt-6 text-xl lg:text-2xl text-lightAccent/90 tracking-wider leading-tight"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1, duration: 1 }}
+                        >
+                        Empowering seamless teamwork and effortless project management.
+                        </motion.h2>
+                    </BoxReveal>
+                    <BoxReveal boxColor={"#0398fc"} duration={1}>
+                        <motion.div
+                        className="mt-8 lg:mt-10 space-y-4 text-lightAccent text-md lg:text-lg leading-relaxed tracking-wide"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1.5, duration: 1 }}
+                        >
+                        <div className="flex items-center justify-start gap-2">
+                            <span className="text-primAccent">
+                            <IconArrowRight />
+                            </span>
+                            Real-time chat with smart code detection.
+                        </div>
+                        <div className="flex items-center justify-start gap-2">
+                            <span className="text-primAccent">
+                            <IconArrowRight />
+                            </span>
+                            Transparent task management for easy tracking.
+                        </div>
+                        <div className="flex items-center justify-start gap-2">
+                            <span className="text-primAccent">
+                            <IconArrowRight />
+                            </span>
+                            Integrated GitHub collaboration.
+                        </div>
+                        </motion.div>
+                    </BoxReveal>
+                    <BoxReveal boxColor={"#0398fc"} duration={0.5}>
+                        <Link to="/auth">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 2, duration: 0.5 }}
+                        >
+                            <Button className="mt-8 lg:mt-10 py-4 lg:py-5 px-8 lg:px-10 bg-gradient-to-r from-[#0398fc] to-[#00c6ff] text-md lg:text-lg tracking-wider shadow-lg transform hover:shadow-primAccent hover:bg-gradient-to-r hover:from-[#00c6ff] hover:to-[#0398fc] transition-all duration-300">
+                            Get Started
+                            </Button>
+                        </motion.div>
+                        </Link>
+                    </BoxReveal>
                     </div>
                 </div>
-                <div className="w-full md:w-1/2 flex justify-center md:justify-start items-center relative">
+                <div className="w-full lg:w-full flex justify-center lg:justify-start items-center relative">
                     <motion.div
-                        className="absolute -top-16 -left-16 md:-top-32 md:-left-24 h-[200px] w-[200px] md:h-[300px] md:w-[300px] rounded-full bg-gradient-to-br from-[#00c6ff] to-[#0398fc] blur-2xl md:blur-3xl opacity-40"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.5 }}
-                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                    className="absolute -top-16 -left-16 lg:-top-32 lg:-left-24 h-[200px] w-[200px] lg:h-[300px] lg:w-[300px] rounded-full bg-gradient-to-br from-[#00c6ff] to-[#0398fc] blur-2xl lg:blur-3xl opacity-40"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.5 }}
+                    transition={{ duration: 1.5, ease: "easeInOut" }}
                     />
                     <motion.img
-                        src={code}
-                        className="max-w-[90%] md:max-w-[700px] rounded-lg shadow-2xl z-10"
-                        initial={{ scale: 1.1 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 1, ease: "easeInOut" }}
+                    src={code}
+                    className="max-w-[90%] lg:max-w-[500px] rounded-lg shadow-2xl z-10"
+                    initial={{ scale: 1.1 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 1, ease: "easeInOut" }}
                     />
                     <motion.div
-                        className="absolute -bottom-10 right-[-50px] md:bottom-[-50px] md:right-[-100px] h-[150px] w-[150px] md:h-[250px] md:w-[250px] rounded-full bg-gradient-to-tr from-[#00c6ff] to-[#00e4ff] blur-2xl md:blur-3xl opacity-50"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.3 }}
-                        transition={{ duration: 1.5, delay: 1 }}
+                    className="absolute -bottom-10 right-[-50px] lg:bottom-[-50px] lg:right-[-100px] h-[150px] w-[150px] lg:h-[200px] lg:w-[200px] rounded-full bg-gradient-to-tr from-[#00c6ff] to-[#00e4ff] blur-2xl lg:blur-3xl opacity-50"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.3 }}
+                    transition={{ duration: 1.5, delay: 1 }}
                     />
                     <motion.div
-                        className="absolute -bottom-10 left-10 md:-bottom-20 md:left-20 h-[100px] w-[100px] md:h-[150px] md:w-[150px] rounded-full bg-gradient-to-br from-[#00e4ff] to-[#0398fc] blur-xl md:blur-2xl opacity-40"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.3 }}
-                        transition={{ duration: 1.5, delay: 1.5 }}
+                    className="absolute -bottom-10 left-10 lg:-bottom-20 lg:left-20 h-[100px] w-[100px] lg:h-[130px] lg:w-[130px] rounded-full bg-gradient-to-br from-[#00e4ff] to-[#0398fc] blur-xl lg:blur-2xl opacity-40"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.3 }}
+                    transition={{ duration: 1.5, delay: 1.5 }}
                     />
                 </div>
             </section>
@@ -267,7 +264,6 @@ export const Home = () => {
                                 with the project's goals.
                             </p>
                         </motion.div>
-
                         <motion.div
                             className="p-6 bg-[#121212] rounded-lg shadow-md border border-lightAccent/10 hover:shadow-lg transition-transform transform hover:-translate-y-2"
                             initial={{ y: 20, opacity: 0 }}
@@ -286,7 +282,6 @@ export const Home = () => {
                                 and organized.
                             </p>
                         </motion.div>
-
                         <motion.div
                             className="p-6 bg-[#121212] rounded-lg shadow-md border border-lightAccent/10 hover:shadow-lg transition-transform transform hover:-translate-y-2"
                             initial={{ y: 20, opacity: 0 }}
@@ -306,7 +301,6 @@ export const Home = () => {
                             </p>
                         </motion.div>
                     </div>
-
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
