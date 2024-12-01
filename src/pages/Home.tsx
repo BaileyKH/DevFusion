@@ -220,7 +220,7 @@ export const Home = () => {
                     ))}
                 </div>
             </section>
-            <section className="w-full py-20 relative bg-[url('src/assets/home/prod-bg.svg')] bg-center bg-cover bg-no-repeat text-center text-darkAccent overflow-hidden">
+            <section className="w-full py-20 relative bg-[url('/prod-bg.svg')] bg-center bg-cover bg-no-repeat text-center text-darkAccent overflow-hidden">
                 <motion.div
                     className="absolute inset-0 [mask-image:radial-gradient(800px_circle_at_center,white,transparent)]"
                     initial={{ opacity: 0 }}
