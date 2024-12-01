@@ -627,7 +627,7 @@ const ProjectDashboard = () => {
                                             onClick={() =>
                                                 setIsUserModalOpen(true)
                                             }
-                                            className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-lg text-primAccent"
+                                            className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-lg cursor-pointer text-primAccent"
                                         >
                                             {user.username[0].toUpperCase()}
                                         </div>
