@@ -384,7 +384,7 @@ export const Chat = () => {
         }/${Date.now()}_${sanitizedFileName}`;
 
         try {
-            const { data: storageData, error: storageError } =
+            const { error: storageError } =
                 await supabase.storage
                     .from("chat_files")
                     .upload(filePath, file);

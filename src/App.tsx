@@ -31,61 +31,53 @@ export const UserContext = createContext<UserContextType>({
 });
 
 function App() {
-    const [session, setSession] = useState<any>(null);
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const location = useLocation();
 
     useEffect(() => {
         const fetchSession = async () => {
-            const {
-                data: { session },
-                error,
-            } = await supabase.auth.getSession();
-            if (error) {
-                console.error("Error fetching session:", error);
+          const {
+            data: { session },
+            error,
+          } = await supabase.auth.getSession();
+          if (error) {
+            console.error("Error fetching session:", error);
+          } else {
+            if (session) {
+              const { data: userProfile, error: userError } = await supabase
+                .from("users")
+                .select("username, email, avatar_url, display_color, github_token")
+                .eq("id", session.user.id)
+                .single();
+      
+              if (userError) {
+                console.error("Error fetching user profile:", userError);
+              } else {
+                setUser({ ...session.user, ...userProfile });
+              }
             } else {
-                if (session) {
-                    const { data: userProfile, error: userError } =
-                        await supabase
-                            .from("users")
-                            .select(
-                                "username, email, avatar_url, display_color, github_token"
-                            )
-                            .eq("id", session.user.id)
-                            .single();
-
-                    if (userError) {
-                        console.error(
-                            "Error fetching user profile:",
-                            userError
-                        );
-                    } else {
-                        setUser({ ...session.user, ...userProfile });
-                    }
-                } else {
-                    setUser(null);
-                }
+              setUser(null);
             }
-            setLoading(false);
+          }
+          setLoading(false);
         };
         fetchSession();
-
+      
         const { data: authListener } = supabase.auth.onAuthStateChange(
-            (_event, session) => {
-                setSession(session);
-                if (session) {
-                    fetchSession();
-                } else {
-                    setUser(null);
-                }
+          (_event, session) => {
+            if (session) {
+              fetchSession();
+            } else {
+              setUser(null);
             }
+          }
         );
-
+      
         return () => {
-            authListener.subscription.unsubscribe();
+          authListener.subscription.unsubscribe();
         };
-    }, []);
+      }, []);
 
     if (loading) {
         return <div>Loading...</div>;
