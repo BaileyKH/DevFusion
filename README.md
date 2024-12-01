@@ -45,7 +45,7 @@ DevFusion is a collaborative project management platform built for developers to
 
 ## Contact
 
-For any inquiries, feel free to contact me via [hen.baileyk@gmail.com].
+For any inquiries, feel free to contact me via [hen.baileyk@gmail.com](hen.baileyk@gmail.com).
 
 ---
 
