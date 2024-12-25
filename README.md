@@ -39,7 +39,7 @@ DevFusion is a collaborative project management platform built for developers to
 ## Project Structure
 
 - **/components**: Reusable components like buttons, cards, and modal components.
-- **/pages**: Main pages such as Dashboard, Project Dashboard, Add Contributors, etc.
+- **/pages**: Main pages such as Dashboard Project Dashboard.
 - **/supabaseDB.ts**: Supabase client configuration.
 - **/hooks**: Custom hooks like `useToast` for displaying notifications.
 
