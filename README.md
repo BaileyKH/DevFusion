@@ -49,5 +49,5 @@ For any inquiries, feel free to contact me via [hen.baileyk@gmail.com](hen.baile
 
 ---
 
-Thank you for using **DevFusion**!
+Thank you for using **DevFusion**! :)
 
